@@ -1,0 +1,16 @@
+{
+    "textures": {
+        "particle": "minecraft:block/water_still",
+        "water": "minecraft:block/water_still"
+    },
+    "elements": [
+        {
+            "from": [1, 14, 1],
+            "to": [15, 14, 15],
+            "faces": {
+                "up": { "uv": [0, 0, 16, 16], "texture": "#water", "tintindex": 0 },
+                "down": { "uv": [0, 0, 16, 16], "texture": "#water", "tintindex": 0 }
+            }
+        }
+    ]
+}

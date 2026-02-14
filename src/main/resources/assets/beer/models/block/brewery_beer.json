@@ -1,0 +1,16 @@
+{
+    "textures": {
+        "particle": "beer:block/beer_fluid",
+        "liquid": "beer:block/beer_fluid"
+    },
+    "elements": [
+        {
+            "from": [1, 14, 1],
+            "to": [15, 14, 15],
+            "faces": {
+                "up": { "uv": [0, 0, 16, 16], "texture": "#liquid", "tintindex": -1 },
+                "down": { "uv": [0, 0, 16, 16], "texture": "#liquid", "tintindex": -1 }
+            }
+        }
+    ]
+}

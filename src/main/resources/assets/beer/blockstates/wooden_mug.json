@@ -1,0 +1,43 @@
+{
+  "variants": {
+    "facing=north,has_beer=false": {
+      "model": "beer:block/wooden_mug",
+      "textures": { "liquid": "beer:block/empty" }
+    },
+    "facing=east,has_beer=false":  {
+      "model": "beer:block/wooden_mug",
+      "y": 90,
+      "textures": { "liquid": "beer:block/empty" }
+    },
+    "facing=south,has_beer=false": {
+      "model": "beer:block/wooden_mug",
+      "y": 180,
+      "textures": { "liquid": "beer:block/empty" }
+    },
+    "facing=west,has_beer=false":  {
+      "model": "beer:block/wooden_mug",
+      "y": 270,
+      "textures": { "liquid": "beer:block/empty" }
+    },
+
+    "facing=north,has_beer=true":  {
+      "model": "beer:block/wooden_mug",
+      "textures": { "liquid": "beer:block/beer_liquid" }
+    },
+    "facing=east,has_beer=true":   {
+      "model": "beer:block/wooden_mug",
+      "y": 90,
+      "textures": { "liquid": "beer:block/beer_liquid" }
+    },
+    "facing=south,has_beer=true":  {
+      "model": "beer:block/wooden_mug",
+      "y": 180,
+      "textures": { "liquid": "beer:block/beer_liquid" }
+    },
+    "facing=west,has_beer=true":   {
+      "model": "beer:block/wooden_mug",
+      "y": 270,
+      "textures": { "liquid": "beer:block/beer_liquid" }
+    }
+  }
+}

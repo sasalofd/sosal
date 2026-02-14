@@ -1,0 +1,74 @@
+plugins {
+    id("eclipse")
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '1.20.1'
+group = 'salo2b.beer'
+
+base {
+    archivesName = 'beer'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "beer" {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dir 'libs'
+    }
+}
+tasks.register('copyJar', Copy) {
+    from jar.archiveFile
+    into "C:/Users/salo2/AppData/Roaming/.minecraft/versions/allah/mods"
+    rename { String fileName -> "${mod_name}.jar" }
+}
+
+build.finalizedBy(copyJar)
+dependencies {
+    minecraft "net.minecraftforge:forge:1.20.1-47.4.10"
+    
+    // т__В_о_Р_О_ж_н_Ы_Й__п_И_Р_о_ж_О_к__
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+        minecraft_version: '1.20.1', minecraft_version_range: '[1.20.1,1.21)',
+        forge_version: '47.4.10', forge_version_range: '[47,)',
+        loader_version_range: '[47,)',
+        mod_id: 'beer', mod_name: 'Beer', mod_license: 'MIT', mod_version: '1.20.1',
+        mod_authors: 'salo2b', mod_description: 'Empty Mod',
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+
+tasks.named('jar', Jar).configure {
+    finalizedBy 'reobfJar'
+}

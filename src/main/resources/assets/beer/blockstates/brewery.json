@@ -1,0 +1,21 @@
+{
+  "multipart": [
+    { "apply": { "model": "beer:block/brewery" }, "when": { "facing": "north" } },
+    { "apply": { "model": "beer:block/brewery", "y": 90 }, "when": { "facing": "east" } },
+    { "apply": { "model": "beer:block/brewery", "y": 180 }, "when": { "facing": "south" } },
+    { "apply": { "model": "beer:block/brewery", "y": 270 }, "when": { "facing": "west" } },
+
+    {
+      "apply": { "model": "beer:block/brewery_water_1" },
+      "when": { "water_level": 1, "has_beer": "false" }
+    },
+    {
+      "apply": { "model": "beer:block/brewery_water_2" },
+      "when": { "water_level": 2, "has_beer": "false" }
+    },
+    {
+      "apply": { "model": "beer:block/brewery_beer" },
+      "when": { "has_beer": "true" }
+    }
+  ]
+}

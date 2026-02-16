@@ -4,6 +4,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType; // Не забудь импорт!
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -16,13 +17,17 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(BeerMod.MODID);
 
-    // Блок хмеля
+    // Блок хмеля (фермерский)
     public static final DeferredBlock<Block> HOPS_CROP = BLOCKS.register("hops_crop",
             () -> new HopsCropBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT).noOcclusion().noCollission()));
 
-    // Дикий хмель
+    // ДИКИЙ ХМЕЛЬ (Оставил один, правильный вариант)
     public static final DeferredBlock<Block> WILD_HOPS = registerBlock("wild_hops",
-            () -> new WildHopsBlock());
+            () -> new WildHopsBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)
+                    .noCollission()
+                    .instabreak()
+                    .sound(SoundType.GRASS)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)));
 
     // Пивоварня
     public static final DeferredBlock<Block> BREWERY = BLOCKS.register("brewery",
@@ -37,6 +42,7 @@ public class ModBlocks {
             () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));
 
 
+    // Вспомогательный метод для регистрации блока вместе с предметом
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn);
@@ -46,14 +52,6 @@ public class ModBlocks {
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
-    public static final DeferredBlock<Block> WILD_HOPS = BLOCKS.register("wild_hops",
-            () -> new WildHopsBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)
-                    .noCollission()
-                    .instabreak()
-                    .sound(SoundType.GRASS)
-                    .offsetType(BlockBehaviour.OffsetType.XZ))); // Чтобы кустики стояли чуть хаотично
-
-
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);

@@ -1,6 +1,7 @@
 package salo2b.beer;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -16,7 +17,6 @@ public class BreweryBlockEntity extends BlockEntity {
     private int brewTime = 0;
     private int beerCount = 0;
 
-    // 200 тиков = 10 секунд.
     private static final int MAX_BREW_TIME = 200;
 
     public BreweryBlockEntity(BlockPos pos, BlockState state) {
@@ -40,7 +40,6 @@ public class BreweryBlockEntity extends BlockEntity {
         if (this.waterLevel < 2 && this.beerCount == 0 && this.brewTime == 0) {
             this.waterLevel++;
             setChanged();
-            // Обновляем клиент
             if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             return true;
         }
@@ -51,7 +50,6 @@ public class BreweryBlockEntity extends BlockEntity {
         if (this.hopsCount < 5 && this.beerCount == 0 && this.brewTime == 0) {
             this.hopsCount++;
             setChanged();
-            // !!! ВАЖНО: Обновляем клиент, чтобы пошел пар !!!
             if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             return true;
         }
@@ -81,7 +79,6 @@ public class BreweryBlockEntity extends BlockEntity {
         if (be.waterLevel >= 2 && be.hopsCount >= 5 && be.beerCount == 0) {
             be.brewTime++;
 
-            // Синхронизация прогресса (раз в секунду)
             if (be.brewTime % 20 == 0) {
                 be.setChanged();
             }
@@ -94,7 +91,6 @@ public class BreweryBlockEntity extends BlockEntity {
                 level.setBlock(pos, state.setValue(BreweryBlock.HAS_BEER, true), 3);
                 
                 be.setChanged();
-                // Финальное обновление
                 level.sendBlockUpdated(pos, state, state, 3);
             }
         } else {
@@ -106,8 +102,8 @@ public class BreweryBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("water", waterLevel);
         tag.putInt("hops", hopsCount);
         tag.putInt("brewTime", brewTime);
@@ -115,8 +111,8 @@ public class BreweryBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         waterLevel = tag.getInt("water");
         hopsCount = tag.getInt("hops");
         brewTime = tag.getInt("brewTime");
@@ -124,8 +120,8 @@ public class BreweryBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
     }
 
     @Override

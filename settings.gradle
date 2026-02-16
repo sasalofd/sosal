@@ -1,14 +1,1 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }
-        maven { url = 'https://maven.parchmentmc.org' }
-    }
-}
-
-// с_О_с_и_с_к_а__в__т_е_с_т_е__#_1
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
-}
-
-rootProject.name = 'salo2b'
+rootProject.name = 'beer'

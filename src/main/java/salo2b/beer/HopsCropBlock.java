@@ -1,11 +1,9 @@
 package salo2b.beer;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +22,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HopsCropBlock extends CropBlock {
-    // Максимальный возраст = 3
+
+    public static final MapCodec<HopsCropBlock> CODEC = simpleCodec(HopsCropBlock::new);
+
     public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
 
@@ -37,6 +37,11 @@ public class HopsCropBlock extends CropBlock {
 
     public HopsCropBlock(BlockBehaviour.Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public MapCodec<? extends CropBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -69,33 +74,24 @@ public class HopsCropBlock extends CropBlock {
         builder.add(AGE);
     }
 
-    // --- СБОР НА ПКМ ---
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         int age = state.getValue(AGE);
 
-        // Если растение полностью выросло (3 стадия)
         if (age == MAX_AGE) {
             if (!level.isClientSide) {
-                // 1. Выбрасываем 2 хмеля (дроп)
                 popResource(level, pos, new ItemStack(ModItems.HOPS.get(), 2));
 
-                // Шанс на семена (если хотите, можно убрать)
                 if (level.random.nextInt(2) == 0) {
                     popResource(level, pos, new ItemStack(ModItems.HOPS_SEEDS.get(), 1));
                 }
 
-                // 2. Играем звук сбора ягод
                 level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 1.0F);
-
-                // 3. Сбрасываем рост на 0
                 level.setBlock(pos, state.setValue(AGE, 0), 2);
             }
-            // Возвращаем SUCCESS (действие выполнено, рука дернулась)
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        // Если не выросло - возвращаем PASS (чтобы работала костная мука)
-        return super.use(state, level, pos, player, hand, hit);
+        return super.useWithoutItem(state, level, pos, player, hit);
     }
 }

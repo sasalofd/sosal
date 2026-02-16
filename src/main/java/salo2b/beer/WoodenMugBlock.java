@@ -1,5 +1,6 @@
 package salo2b.beer;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -15,10 +16,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class WoodenMugBlock extends Block {
+
+    public static final MapCodec<WoodenMugBlock> CODEC = simpleCodec(WoodenMugBlock::new);
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAS_BEER = BooleanProperty.create("has_beer");
 
-    // Маленький хитбокс для кружки (4x5 пикселей)
     private static final VoxelShape SHAPE = Block.box(6, 0, 6, 10, 6, 10);
 
     public WoodenMugBlock(Properties pProperties) {
@@ -26,6 +29,11 @@ public class WoodenMugBlock extends Block {
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(HAS_BEER, false));
+    }
+
+    @Override
+    protected MapCodec<? extends Block> codec() {
+        return CODEC;
     }
 
     @Override

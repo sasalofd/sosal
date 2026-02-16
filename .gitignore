@@ -8,3 +8,5 @@ out/
 *.ipr
 .DS_Store
 Thumbs.db
+local.properties
+

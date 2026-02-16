@@ -1,0 +1,11 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:flower_forest",
+    "minecraft:forest",
+    "minecraft:birch_forest"
+  ],
+  "features": "beermod:wild_hops_placed",
+  "step": "vegetal_decoration"
+}

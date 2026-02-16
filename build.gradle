@@ -6,6 +6,16 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.71'
 }
 
+// Load local.properties if it exists
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+    localProperties.each { prop ->
+        project.extensions.extraProperties.set(prop.key, prop.value)
+    }
+}
+
 version = mod_version
 group = mod_group_id
 
@@ -84,4 +94,26 @@ tasks.withType(ProcessResources).configureEach {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+// Custom task for local development to copy JAR to mods folder
+tasks.register('copyJar', Copy) {
+    dependsOn 'jar'
+    
+    // Check local.properties or gradle.properties for mod_dest_dir
+    def destDir = project.findProperty('mod_dest_dir')
+    
+    if (destDir) {
+        from jar.archiveFile
+        into destDir
+        
+        doLast {
+            println "Successfully copied ${jar.archiveFileName.get()} to ${destDir}"
+        }
+    }
+}
+
+// Make build task depend on copyJar so it runs automatically
+tasks.named('build') {
+    finalizedBy 'copyJar'
 }

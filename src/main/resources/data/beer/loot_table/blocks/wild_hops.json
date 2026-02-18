@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "beermod:hops"
+          "name": "beer:hops_seeds"
         }
       ],
       "conditions": [

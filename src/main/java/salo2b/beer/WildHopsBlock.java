@@ -2,7 +2,9 @@ package salo2b.beer;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +21,11 @@ public class WildHopsBlock extends BushBlock {
     public WildHopsBlock(Properties properties) {
         super(properties);
     }
-
+    @Override
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        // Здесь мы указываем, какой предмет давать при выборе блока
+        return new ItemStack(ModItems.HOPS.get());
+    }
     @Override
     protected MapCodec<? extends BushBlock> codec() {
         return CODEC;

@@ -1,17 +1,17 @@
 {
   "type": "minecraft:random_patch",
   "config": {
-    "tries": 32,
-    "xz_spread": 7,
-    "y_spread": 3,
+    "tries": 4,
+    "xz_spread": 4,
+    "y_spread": 2 ,
     "feature": {
       "feature": {
         "type": "minecraft:simple_block",
         "config": {
           "to_place": {
-            "type": "minecraft:simple_block_state_provider",
+            "type": "minecraft:simple_state_provider",
             "state": {
-              "name": "beermod:wild_hops"
+              "Name": "beer:wild_hops"
             }
           }
         }
@@ -20,8 +20,19 @@
         {
           "type": "minecraft:block_predicate_filter",
           "predicate": {
-            "type": "minecraft:matching_blocks",
-            "blocks": "minecraft:air"
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "blocks": "minecraft:air"
+              },
+              {
+                "type": "minecraft:would_survive",
+                "state": {
+                  "Name": "beer:wild_hops"
+                }
+              }
+            ]
           }
         }
       ]

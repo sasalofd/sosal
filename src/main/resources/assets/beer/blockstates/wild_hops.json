@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "beermod:block/wild_hops"
+      "model": "beer:block/wild_hops"
     }
   }
 }

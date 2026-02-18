@@ -2,6 +2,6 @@
   "parent": "minecraft:block/cross",
   "render_type": "minecraft:cutout",
   "textures": {
-    "cross": "beer:block/hops_crop_stage3"
+    "cross": "beer:block/wild_hops"
   }
 }

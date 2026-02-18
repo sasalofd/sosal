@@ -44,7 +44,7 @@ public class BeerMod {
             modEventBus.addListener(this::registerBlockColors);
         }
 
-        NeoForge.EVENT_BUS.register(this);
+
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {

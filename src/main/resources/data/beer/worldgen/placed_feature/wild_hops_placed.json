@@ -1,9 +1,9 @@
 {
-  "feature": "beermod:wild_hops_patch",
+  "feature": "beer:wild_hops_patch",
   "placement": [
     {
       "type": "minecraft:rarity_filter",
-      "chance": 16
+      "chance": 32
     },
     {
       "type": "minecraft:in_square"

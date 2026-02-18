@@ -6,6 +6,8 @@
     "minecraft:forest",
     "minecraft:birch_forest"
   ],
-  "features": "beermod:wild_hops_placed",
+  "features": [
+    "beer:wild_hops_placed"
+  ],
   "step": "vegetal_decoration"
 }

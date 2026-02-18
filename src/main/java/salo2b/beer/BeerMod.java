@@ -26,10 +26,20 @@ public class BeerMod {
                     .icon(() -> new ItemStack(ModItems.BEER.get()))
                     .title(Component.translatable("itemGroup.beer_tab"))
                     .displayItems((parameters, output) -> {
+                        // Растения и ингредиенты
                         output.accept(ModItems.HOPS_SEEDS.get());
                         output.accept(ModItems.HOPS.get());
+
+                        // Посуда и блоки
                         output.accept(ModBlocks.WOODEN_MUG.get());
-                        output.accept(ModItems.BEER.get());
+                        output.accept(ModBlocks.BEER_BARREL.get()); // НАША БОЧКА
+
+                        // Виды пива
+                        output.accept(ModItems.BEER.get());         // Обычное
+                        output.accept(ModItems.FILTERED_BEER.get()); // Фильтрованное
+                        output.accept(ModItems.LIGHT_BEER.get());    // Светлое
+
+                        // Оборудование
                         output.accept(ModItems.BREWERY_ITEM.get());
                     })
                     .build());
@@ -43,8 +53,6 @@ public class BeerMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
         }
-
-
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {

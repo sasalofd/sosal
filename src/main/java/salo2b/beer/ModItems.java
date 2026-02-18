@@ -21,13 +21,21 @@ public class ModItems {
     // Хмель
     public static final DeferredItem<Item> HOPS = ITEMS.register("hops",
             () -> new Item(new Item.Properties()));
+    // Отфильтрованное пиво
+    public static final DeferredItem<Item> FILTERED_BEER = ITEMS.register("filtered_beer",
+            () -> new Item(new Item.Properties().stacksTo(16).food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.3f).alwaysEdible().build())));
+
+    // Светлое пиво
+    public static final DeferredItem<Item> LIGHT_BEER = ITEMS.register("light_beer",
+            () -> new Item(new Item.Properties().stacksTo(16).food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.5f).alwaysEdible().build())));
+
 
     // Пиво (с эффектами)
     public static final DeferredItem<Item> BEER = ITEMS.register("beer",
             () -> new BeerMugItem(
                     ModBlocks.BEER.get(),
                     new Item.Properties()
-                            .stacksTo(1)
+                            .stacksTo(16)
                             .food(new FoodProperties.Builder()
                                     .nutrition(4)
                                     .saturationModifier(0.3f)

@@ -3,12 +3,15 @@
   "item.beer.hops_seeds": "Семена хмеля",
   "item.beer.hops": "Хмель",
   "block.beer.wooden_mug": "Деревянная кружка",
-  "item.beer.beer": "Кружка пива",
-  "block.beer.beer": "Кружка пива",
+  "block.beer.beer": "Нефильтрованное пива",
   "block.beer.brewery": "Пивоварня",
   "message.beer.water_added": "Вода залита: %s/2",
   "message.beer.hops_added": "Хмель добавлен: %s/5",
   "message.beer.beer_taken": "Пива в пивоварне осталось: %s",
   "message.beer.brewery_status": "Этап варки: %s/5",
-  "message.beer.ready_count": "Готово пива: %s шт."
+  "message.beer.ready_count": "Готово пива: %s шт.",
+  "block.beer.beer_barrel": "Пивная бочка",
+  "item.beer.beer_barrel": "Пивная бочка",
+  "item.beer.filtered_beer": "Фильтрованное пиво",
+  "item.beer.light_beer": "Светлое пиво"
 }

@@ -20,7 +20,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class BeerBarrelBlock extends BaseEntityBlock {
-    // 1. КОДЕК (Обязательно для 1.21.1)
     public static final MapCodec<BeerBarrelBlock> CODEC = simpleCodec(BeerBarrelBlock::new);
 
     @Override
@@ -48,33 +47,40 @@ public class BeerBarrelBlock extends BaseEntityBlock {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof BeerBarrelBlockEntity barrel) {
 
-            // --- ЛОГИКА ЗАЛИВКИ ---
-            // Проверяем, является ли предмет в руке любым из трех видов пива
+            // Проверяем все виды пива
             boolean isAnyBeer = stack.is(ModItems.BEER.get()) ||
                     stack.is(ModItems.FILTERED_BEER.get()) ||
                     stack.is(ModItems.LIGHT_BEER.get());
 
+            // --- ЛОГИКА ЗАЛИВКИ ---
             if (isAnyBeer) {
-                // Проверяем, совпадает ли сорт с тем, что уже в бочке
+                // Если полная
+                if (barrel.getMugsCount() >= 10) {
+                    if (!level.isClientSide) {
+                        player.displayClientMessage(Component.literal("§6Бочка заполнена!§r"), true);
+                    }
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                }
+
+                // Если сорт подходит
                 if (barrel.canFillWith(stack)) {
-                    if (barrel.addMug()) { // Убедись, что метод называется addMug()
+                    if (barrel.addMug()) {
                         if (!level.isClientSide) {
                             stack.shrink(1);
                             ItemStack emptyMug = new ItemStack(ModBlocks.WOODEN_MUG.get());
-                            if (stack.isEmpty()) {
-                                player.setItemInHand(hand, emptyMug);
-                            } else if (!player.getInventory().add(emptyMug)) {
+                            if (!player.getInventory().add(emptyMug)) {
                                 player.drop(emptyMug, false);
                             }
                             level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
-                            player.displayClientMessage(Component.literal("Залито: " + barrel.getMugsCount() + "/10"), true);
+
+                            // НОВОЕ УВЕДОМЛЕНИЕ
+                            player.displayClientMessage(Component.literal("§7Добавлена кружка. В бочке: §6" + barrel.getMugsCount() + "/10"), true);
                         }
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 } else {
-                    // Если сорт не совпадает
                     if (!level.isClientSide) {
-                        player.displayClientMessage(Component.literal("§cНельзя смешивать разные сорта!§r"), true);
+                        player.displayClientMessage(Component.literal("§cЭтот сорт нельзя смешивать с тем, что в бочке!§r"), true);
                     }
                     return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 }
@@ -84,24 +90,34 @@ public class BeerBarrelBlock extends BaseEntityBlock {
             if (stack.is(ModBlocks.WOODEN_MUG.get().asItem())) {
                 if (barrel.getMugsCount() > 0) {
                     if (!level.isClientSide) {
-                        ItemStack beerStack = barrel.takeMug(); // Метод забирает 1 кружку текущего сорта
+                        ItemStack beerStack = barrel.takeMug();
                         stack.shrink(1);
-                        if (stack.isEmpty()) {
-                            player.setItemInHand(hand, beerStack);
-                        } else if (!player.getInventory().add(beerStack)) {
+                        if (!player.getInventory().add(beerStack)) {
                             player.drop(beerStack, false);
                         }
                         level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-                        player.displayClientMessage(Component.literal("В бочке: " + barrel.getMugsCount() + "/10 | Сорт: " + barrel.getStageName()), true);
+
+                        // НОВОЕ УВЕДОМЛЕНИЕ
+                        player.displayClientMessage(Component.literal("§7Забрали кружку. Осталось: §6" + barrel.getMugsCount() + "/10 §7| Сорт: §e" + barrel.getStageName()), true);
+                    }
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                } else {
+                    if (!level.isClientSide) {
+                        player.displayClientMessage(Component.literal("§8Бочка пуста§r"), true);
                     }
                     return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 }
             }
 
-            // --- СТАТУС ПУСТОЙ РУКОЙ ---
+            // --- КЛИК ПУСТОЙ РУКОЙ (ПРОВЕРКА) ---
             if (stack.isEmpty()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.literal("Статус: " + barrel.getStageName() + " (" + barrel.getMugsCount() + "/10)"), true);
+                    if (barrel.getMugsCount() == 0) {
+                        player.displayClientMessage(Component.literal("§8Бочка пуста§r"), true);
+                    } else {
+                        // ПОНЯТНОЕ ОПИСАНИЕ
+                        player.displayClientMessage(Component.literal("§7Кружек пива в бочке: §6" + barrel.getMugsCount() + "/10 §7| Сорт: §e" + barrel.getStageName()), true);
+                    }
                 }
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }

@@ -29,7 +29,7 @@ public class BeerMod {
                         // Растения и ингредиенты
                         output.accept(ModItems.HOPS_SEEDS.get());
                         output.accept(ModItems.HOPS.get());
-
+                        output.accept(ModItems.BARLEY_SEEDS.get());
                         // Внутри displayItems
                         output.accept(ModItems.BARLEY.get());
                         output.accept(ModItems.MALT.get());

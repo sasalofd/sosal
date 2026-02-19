@@ -17,5 +17,8 @@
   "block.beer.malt_vat": "Солодовый чан",
   "item.beer.barley": "Ячмень",
   "item.beer.malt": "Солод",
-  "item.beer.malt_vat": "Солодовый чан"
+  "item.beer.malt_vat": "Солодовый чан",
+  "item.beer.barley_seeds": "Семена ячменя",
+  "block.beer.barley_crop": "Посевы ячменя"
+
 }

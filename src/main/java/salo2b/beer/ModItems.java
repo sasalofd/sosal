@@ -54,4 +54,8 @@ public class ModItems {
     // Пивоварня как предмет
     public static final DeferredItem<Item> BREWERY_ITEM = ITEMS.register("brewery",
             () -> new BlockItem(ModBlocks.BREWERY.get(), new Item.Properties()));
+    // Семена ячменя (связываем их с будущим блоком BARLEY_CROP)
+    public static final DeferredItem<Item> BARLEY_SEEDS = ITEMS.register("barley_seeds",
+            () -> new ItemNameBlockItem(ModBlocks.BARLEY_CROP.get(), new Item.Properties()));
+
 }

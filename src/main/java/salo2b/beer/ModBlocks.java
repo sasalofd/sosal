@@ -33,6 +33,10 @@ public class ModBlocks {
     public static final DeferredBlock<Block> BREWERY = BLOCKS.register("brewery",
             () -> new BreweryBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().strength(4.0f).requiresCorrectToolForDrops()));
 
+    public static final DeferredBlock<Block> BEER_BARREL = registerBlock("beer_barrel",
+            () -> new BeerBarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL)));
+
+
     // Пустая кружка
     public static final DeferredBlock<Block> WOODEN_MUG = registerBlock("wooden_mug",
             () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));

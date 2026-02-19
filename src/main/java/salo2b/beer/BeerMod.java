@@ -30,6 +30,12 @@ public class BeerMod {
                         output.accept(ModItems.HOPS_SEEDS.get());
                         output.accept(ModItems.HOPS.get());
 
+                        // Внутри displayItems
+                        output.accept(ModItems.BARLEY.get());
+                        output.accept(ModItems.MALT.get());
+                        output.accept(ModBlocks.MALT_VAT.get());
+
+
                         // Посуда и блоки
                         output.accept(ModBlocks.WOODEN_MUG.get());
                         output.accept(ModBlocks.BEER_BARREL.get()); // НАША БОЧКА

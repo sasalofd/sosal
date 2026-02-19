@@ -13,5 +13,9 @@
   "block.beer.beer_barrel": "Пивная бочка",
   "item.beer.beer_barrel": "Пивная бочка",
   "item.beer.filtered_beer": "Фильтрованное пиво",
-  "item.beer.light_beer": "Светлое пиво"
+  "item.beer.light_beer": "Светлое пиво",
+  "block.beer.malt_vat": "Солодовый чан",
+  "item.beer.barley": "Ячмень",
+  "item.beer.malt": "Солод",
+  "item.beer.malt_vat": "Солодовый чан"
 }

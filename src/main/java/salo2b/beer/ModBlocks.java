@@ -45,6 +45,8 @@ public class ModBlocks {
     public static final DeferredBlock<Block> BEER = BLOCKS.register("beer",
             () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));
 
+    public static final DeferredBlock<Block> MALT_VAT = registerBlock("malt_vat",
+            () -> new MaltVatBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CAULDRON)));
 
     // Вспомогательный метод для регистрации блока вместе с предметом
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {

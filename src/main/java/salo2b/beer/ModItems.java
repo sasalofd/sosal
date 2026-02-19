@@ -28,7 +28,13 @@ public class ModItems {
     // Светлое пиво
     public static final DeferredItem<Item> LIGHT_BEER = ITEMS.register("light_beer",
             () -> new Item(new Item.Properties().stacksTo(16).food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.5f).alwaysEdible().build())));
+    // Ячмень
+    public static final DeferredItem<Item> BARLEY = ITEMS.register("barley",
+            () -> new Item(new Item.Properties()));
 
+    // Солод
+    public static final DeferredItem<Item> MALT = ITEMS.register("malt",
+            () -> new Item(new Item.Properties()));
 
     // Пиво (с эффектами)
     public static final DeferredItem<Item> BEER = ITEMS.register("beer",

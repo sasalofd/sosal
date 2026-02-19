@@ -21,6 +21,10 @@ public class ModBlockEntities {
             BLOCK_ENTITIES.register("brewery_be", () ->
                     BlockEntityType.Builder.of(BreweryBlockEntity::new, ModBlocks.BREWERY.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MaltVatBlockEntity>> MALT_VAT_BE =
+            BLOCK_ENTITIES.register("malt_vat_be", () ->
+                    BlockEntityType.Builder.of(MaltVatBlockEntity::new, ModBlocks.MALT_VAT.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

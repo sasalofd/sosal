@@ -2,14 +2,14 @@ package salo2b.beer;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType; // Не забудь импорт!
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ModBlocks {
@@ -35,7 +35,27 @@ public class ModBlocks {
 
     public static final DeferredBlock<Block> BEER_BARREL = registerBlock("beer_barrel",
             () -> new BeerBarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL)));
+    // Бревно яблони (используем дуб как основу)
+    public static final DeferredBlock<Block> APPLE_LOG = registerBlock("apple_log",
+            () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
 
+    // Обычная листва (пустая)
+    public static final DeferredBlock<Block> APPLE_LEAVES = registerBlock("apple_leaves",
+            () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)));
+
+    // Листва с яблоками (она будет иметь стадии роста)
+    public static final DeferredBlock<Block> APPLE_FRUIT_LEAVES = registerBlock("apple_fruit_leaves",
+            () -> new AppleFruitLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+                    .randomTicks() // Обязательно для роста
+                    .noOcclusion()));
+    // Саженец яблони
+    public static final DeferredBlock<Block> APPLE_SAPLING = registerBlock("apple_sapling",
+            () -> new SaplingBlock(
+                    new TreeGrower("apple",
+                            Optional.empty(), // Мега-дерево (нет)
+                            Optional.of(ModConfiguredFeatures.APPLE_TREE), // Ссылка на генерацию
+                            Optional.empty()),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING)));
 
     // Пустая кружка
     public static final DeferredBlock<Block> WOODEN_MUG = registerBlock("wooden_mug",
@@ -60,6 +80,7 @@ public class ModBlocks {
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+
     }
 
     public static void register(IEventBus eventBus) {

@@ -43,7 +43,7 @@
               "enchantment": "minecraft:fortune",
               "formula": "minecraft:binomial_with_bonus_count",
               "function": "minecraft:apply_bonus",
-              "parameters": { "extra": 3, "probability": 0.5714286 }
+              "parameters": { "extra": 2, "probability": 0.5714286 }
             }
           ],
           "name": "beer:barley_seeds"

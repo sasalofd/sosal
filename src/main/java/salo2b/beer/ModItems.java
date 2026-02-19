@@ -57,5 +57,8 @@ public class ModItems {
     // Семена ячменя (связываем их с будущим блоком BARLEY_CROP)
     public static final DeferredItem<Item> BARLEY_SEEDS = ITEMS.register("barley_seeds",
             () -> new ItemNameBlockItem(ModBlocks.BARLEY_CROP.get(), new Item.Properties()));
+    public static final DeferredItem<Item> GREEN_APPLE = ITEMS.register("green_apple",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.3f).build())));
+
 
 }

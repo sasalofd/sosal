@@ -39,15 +39,21 @@ public class ModBlocks {
     public static final DeferredBlock<Block> APPLE_LOG = registerBlock("apple_log",
             () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG)));
 
-    // Обычная листва (пустая)
+    // Обычная листва
     public static final DeferredBlock<Block> APPLE_LEAVES = registerBlock("apple_leaves",
-            () -> new LeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)));
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+                    .noOcclusion() // Чтобы не было черных дыр
+                    .isSuffocating((s, l, p) -> false)
+                    .isViewBlocking((s, l, p) -> false)));
 
-    // Листва с яблоками (она будет иметь стадии роста)
+    // Плодовая листва
     public static final DeferredBlock<Block> APPLE_FRUIT_LEAVES = registerBlock("apple_fruit_leaves",
             () -> new AppleFruitLeavesBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
-                    .randomTicks() // Обязательно для роста
-                    .noOcclusion()));
+                    .randomTicks()
+                    .noOcclusion()
+                    // Этот параметр отключает затухание листвы, если мы не используем LeavesBlock класс напрямую
+                    .isViewBlocking((state, level, pos) -> false)));
+
     // Саженец яблони
     public static final DeferredBlock<Block> APPLE_SAPLING = registerBlock("apple_sapling",
             () -> new SaplingBlock(

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "stage=0": { "model": "beer:block/apple_sapling" },
+    "stage=1": { "model": "beer:block/apple_sapling" }
+  }
+}

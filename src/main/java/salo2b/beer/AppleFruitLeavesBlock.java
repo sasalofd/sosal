@@ -48,7 +48,7 @@ public class AppleFruitLeavesBlock extends Block {
             level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0f, 1.0f);
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        return ItemInteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override

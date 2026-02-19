@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "beer:block/apple_log" },
+    "axis=z": { "model": "beer:block/apple_log", "x": 90 },
+    "axis=x": { "model": "beer:block/apple_log", "x": 90, "y": 90 }
+  }
+}

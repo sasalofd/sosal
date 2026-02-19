@@ -1,0 +1,25 @@
+{
+  "feature": "beer:apple_tree",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 40
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:surface_relative_threshold_filter",
+      "heightmap": "OCEAN_FLOOR",
+      "min_inclusive": -1,
+      "max_inclusive": 15
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

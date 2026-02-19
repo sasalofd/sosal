@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "beer:block/apple_leaves"
+  }
+}

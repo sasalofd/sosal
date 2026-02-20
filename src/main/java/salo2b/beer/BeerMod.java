@@ -35,7 +35,7 @@ public class BeerMod {
                         output.accept(ModItems.BARLEY.get());
                         output.accept(ModItems.MALT.get());
                         output.accept(ModItems.GREEN_APPLE.get());
-                        output.accept(ModBlocks.APPLE_SAPLING.get()); // Саженец
+                        output.accept(ModBlocks.APPLE_SAPLING.get());
 
                         // Блоки дерева
                         output.accept(ModBlocks.APPLE_LOG.get());
@@ -65,15 +65,18 @@ public class BeerMod {
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
-            modEventBus.addListener(this::onClientSetup); // Слушатель для настройки клиента
+            modEventBus.addListener(this::onClientSetup);
         }
     }
 
-    // Этот метод заставляет листву быть прозрачной (убирает черные пятна на быстрой графике)
     private void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            // Устанавливаем прозрачность для листвы
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_LEAVES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_FRUIT_LEAVES.get(), RenderType.cutout());
+
+            // ИСПРАВЛЕНИЕ: Устанавливаем прозрачность для саженца, чтобы убрать квадрат
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_SAPLING.get(), RenderType.cutout());
         });
     }
 

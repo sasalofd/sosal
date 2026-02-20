@@ -1,0 +1,6 @@
+{
+  "parent": "beer:block/mug_base",
+  "textures": {
+    "texture": "beer:block/filtered_beer"
+  }
+}

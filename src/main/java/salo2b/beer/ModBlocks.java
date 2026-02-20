@@ -67,9 +67,14 @@ public class ModBlocks {
     public static final DeferredBlock<Block> WOODEN_MUG = registerBlock("wooden_mug",
             () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));
 
-    // Полная кружка (блок)
     public static final DeferredBlock<Block> BEER = BLOCKS.register("beer",
-            () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
+
+    public static final DeferredBlock<Block> LIGHT_BEER = BLOCKS.register("light_beer",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
+
+    public static final DeferredBlock<Block> FILTERED_BEER = BLOCKS.register("filtered_beer",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> MALT_VAT = registerBlock("malt_vat",
             () -> new MaltVatBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CAULDRON)));

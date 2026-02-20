@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "beer:block/light_beer" },
+    "facing=east":  { "model": "beer:block/light_beer", "y": 90 },
+    "facing=south": { "model": "beer:block/light_beer", "y": 180 },
+    "facing=west":  { "model": "beer:block/light_beer", "y": 270 }
+  }
+}

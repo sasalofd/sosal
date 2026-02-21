@@ -20,51 +20,47 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BeerMugBlock extends Block {
-    // Свойство поворота для blockstates
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
-    // Идеальный хитбокс: "худой" и "низкий" (в облипку кружке)
-    // 6.5 и 9.5 — делают ширину 3 пикселя
-    // 6.0 — высота 6 пикселей (под пену)
-    protected static final VoxelShape SHAPE = Block.box(6.5D, 0.0D, 6.5D, 9.5D, 6.0D, 9.5D);
+    // Твои настройки хитбоксов для подгона
+    private static final VoxelShape SHAPE_NORTH = Block.box(6.2D, 0.0D, 5.2D, 10.8D, 5.5D, 10.8D);
+    private static final VoxelShape SHAPE_SOUTH = Block.box(5.2D, 0.0D, 5.0D, 9.9D, 5.5D, 10.8D);
+    private static final VoxelShape SHAPE_EAST = Block.box(5.2D, 0.0D, 6.2D, 11.0D, 5.5D, 10.8D);
+    private static final VoxelShape SHAPE_WEST = Block.box(5.0D, 0.0D, 5.2D, 10.8D, 5.5D, 9.9D);
 
     public BeerMugBlock(BlockBehaviour.Properties properties) {
-        // Устанавливаем настройки (стекло, прозрачность, сила)
-        super(properties.noOcclusion().strength(0.3F).sound(SoundType.GLASS));
+        // Заменили SoundType.OAK_PLANKS на SoundType.WOOD (звук забора/дерева)
+        super(properties.noOcclusion().strength(0.3F).sound(SoundType.WOOD));
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
-    // Применяем маленькую рамку (хитбокс)
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        return switch (state.getValue(FACING)) {
+            case SOUTH -> SHAPE_SOUTH;
+            case EAST -> SHAPE_EAST;
+            case WEST -> SHAPE_WEST;
+            default -> SHAPE_NORTH;
+        };
     }
 
-    // Определяем направление при установке (лицом к игроку)
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    // Регистрируем состояние FACING в блоке
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
-    // Сбор кружки кликом (ПКМ без шифта)
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide) {
-            // Создаем предмет из этого же блока
             ItemStack itemStack = new ItemStack(this.asItem());
-
-            // Пытаемся добавить в инвентарь (автоматически ищет стак, если stacksTo > 1)
             if (!player.getInventory().add(itemStack)) {
                 player.drop(itemStack, false);
             }
-
-            // Убираем кружку с земли
             level.removeBlock(pos, false);
         }
         return InteractionResult.SUCCESS;

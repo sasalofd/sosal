@@ -36,6 +36,8 @@ public class BeerMod {
                         output.accept(ModItems.MALT.get());
                         output.accept(ModItems.GREEN_APPLE.get());
                         output.accept(ModBlocks.APPLE_SAPLING.get());
+                        output.accept(ModItems.WET_BARLEY_SEEDS.get());
+
 
                         // Блоки дерева
                         output.accept(ModBlocks.APPLE_LOG.get());
@@ -59,6 +61,7 @@ public class BeerMod {
 
     public BeerMod(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
+        ModDataComponents.DATA_COMPONENT_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);

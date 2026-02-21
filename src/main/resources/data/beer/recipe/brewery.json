@@ -24,7 +24,7 @@
     }
   },
   "result": {
-    "item": "beer:brewery",
+    "id": "beer:brewery",
     "count": 1
   }
 }

@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemNameBlockItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BeerMod.MODID);
 
@@ -73,4 +74,8 @@ public class ModItems {
 
     public static final DeferredItem<Item> GREEN_APPLE = ITEMS.register("green_apple",
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.3f).build())));
+    // Добавь это в твой ModItems.java
+    public static final DeferredItem<Item> WET_BARLEY_SEEDS = ITEMS.register("wet_barley_seeds",
+            () -> new WetBarleyItem(new Item.Properties().stacksTo(64)));
+
 }

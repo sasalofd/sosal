@@ -77,5 +77,10 @@ public class ModItems {
     // Добавь это в твой ModItems.java
     public static final DeferredItem<Item> WET_BARLEY_SEEDS = ITEMS.register("wet_barley_seeds",
             () -> new WetBarleyItem(new Item.Properties().stacksTo(64)));
+    public static final DeferredItem<Item> CRUSHED_MALT = ITEMS.register("crushed_malt",
+            () -> new Item(new Item.Properties()));
+
+
+
 
 }

@@ -80,6 +80,9 @@ public class ModBlocks {
     public static final DeferredBlock<Block> FILTERED_BEER = BLOCKS.register("filtered_beer",
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
+    public static final DeferredBlock<Block> GEARBOX = registerBlock("gearbox",
+            () -> new GearboxBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).noOcclusion()));
+
 
     public static final DeferredBlock<Block> WINDMILL_ROTOR = registerBlock("windmill_rotor",
             () -> new WindmillRotorBlock(BlockBehaviour.Properties.of().noOcclusion().strength(3.0f)));

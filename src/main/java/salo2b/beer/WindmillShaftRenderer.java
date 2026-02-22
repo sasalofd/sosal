@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 public class WindmillShaftRenderer implements BlockEntityRenderer<WindmillShaftBlockEntity> {
-
     public WindmillShaftRenderer(BlockEntityRendererProvider.Context context) {
     }
 
@@ -28,13 +27,17 @@ public class WindmillShaftRenderer implements BlockEntityRenderer<WindmillShaftB
         poseStack.pushPose();
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        // Повертаємо вал за напрямком блоку
-        float rotationY = facing.toYRot();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY));
-
-        // Обертання навколо власної осі (Z)
+        // 1. Считаем угол ОДИН раз (без дублей!)
         float fluidAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
-        poseStack.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
+
+        if (facing.getAxis() == Direction.Axis.Y) {
+            // 2. Инвертируем вращение для вертикали (ставим минус)
+            poseStack.mulPose(Axis.YP.rotationDegrees(-fluidAngle));
+        } else {
+            float rotationY = facing.toYRot();
+            poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
+        }
 
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 

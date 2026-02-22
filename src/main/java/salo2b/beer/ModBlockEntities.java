@@ -39,6 +39,9 @@ public class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WindmillShaftBlockEntity>> WINDMILL_SHAFT =
             BLOCK_ENTITIES.register("windmill_shaft",
                     () -> BlockEntityType.Builder.of(WindmillShaftBlockEntity::new, ModBlocks.WINDMILL_SHAFT.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GearboxBlockEntity>> GEARBOX =
+            BLOCK_ENTITIES.register("gearbox",
+                    () -> BlockEntityType.Builder.of(GearboxBlockEntity::new, ModBlocks.GEARBOX.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

@@ -18,10 +18,10 @@ public class WindmillRotorRenderer implements BlockEntityRenderer<WindmillRotorB
     }
 
     @Override
-    public void render(WindmillRotorBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void render(WindmillRotorBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         BlockState state = entity.getBlockState();
 
-        // Защита от вылета
+        // Проверяем FACING именно ротора
         if (!state.hasProperty(WindmillRotorBlock.FACING)) return;
 
         Direction facing = state.getValue(WindmillRotorBlock.FACING);
@@ -29,32 +29,26 @@ public class WindmillRotorRenderer implements BlockEntityRenderer<WindmillRotorB
 
         poseStack.pushPose();
 
-        // 1. Сдвигаем в центр блока
+        // Центрируем модель
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        // 2. Поворачиваем всю сцену "лицом" к игроку. (+180 градусов компенсации)
+        // Поворачиваем лопасти "лицом" к миру
         float rotationY = facing.toYRot();
         poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY + 180));
 
-        // 3. Крутим лопасти вокруг оси Z
+        // Вращение
         float fluidAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
         poseStack.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
 
-        // ==================================================
-        // УВЕЛИЧИВАЕМ РАЗМЕР ЛОПАСТЕЙ!
-        // Меняй 2.5F на любое другое число (например, 3.0F или 4.0F),
-        // если хочешь сделать их еще больше или немного меньше.
-        // Делаем лопасти по-настоящему огромными!
+        // Масштаб (делаем лопасти большими)
         poseStack.scale(5.0F, 5.0F, 5.0F);
-        // ==================================================
 
-        // 4. Возвращаем координаты на место
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 
-        // Отрисовка
+        // Отрисовка модели из JSON
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(
                 poseStack.last(),
-                buffer.getBuffer(RenderType.cutout()),
+                bufferSource.getBuffer(RenderType.cutout()),
                 state, model, 1.0F, 1.0F, 1.0F,
                 combinedLight, combinedOverlay,
                 ModelData.EMPTY, null

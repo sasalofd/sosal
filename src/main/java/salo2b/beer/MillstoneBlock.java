@@ -28,23 +28,25 @@ public class MillstoneBlock extends BaseEntityBlock {
         return CODEC;
     }
 
-    // Эта часть отвечает за нажатие правой кнопкой мыши
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
             ItemStack itemInHand = player.getItemInHand(hand);
+            ItemStack outputSlot = millstone.inventory.getStackInSlot(1);
 
-            // 1. Если в руке ячмень — кладем его в жернова
-            if (itemInHand.is(ModItems.BARLEY.get())) {
-                ItemStack remaining = millstone.inventory.insertItem(0, itemInHand.copy(), false);
-                player.setItemInHand(hand, remaining);
+            // 1. Если в выходном слоте что-то есть — отдаем игроку СРАЗУ (даже если в руке что-то есть)
+            if (!outputSlot.isEmpty()) {
+                ItemStack extracted = millstone.inventory.extractItem(1, 64, false);
+                if (!player.addItem(extracted)) {
+                    player.drop(extracted, false);
+                }
                 return ItemInteractionResult.SUCCESS;
             }
 
-            // 2. Если рука пустая — забираем готовый солод из выходного слота
-            if (itemInHand.isEmpty() && !millstone.inventory.getStackInSlot(1).isEmpty()) {
-                ItemStack output = millstone.inventory.extractItem(1, 64, false);
-                player.addItem(output);
+            // 2. Если выход пуст и в руке СОЛОД — кладем его во вход
+            if (itemInHand.is(ModItems.MALT.get())) {
+                ItemStack remaining = millstone.inventory.insertItem(0, itemInHand.copy(), false);
+                player.setItemInHand(hand, remaining);
                 return ItemInteractionResult.SUCCESS;
             }
         }
@@ -59,11 +61,10 @@ public class MillstoneBlock extends BaseEntityBlock {
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        // Мы используем ENTITYBLOCK_ANIMATED, потому что наш рендер крутит модель
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        // Меняем на MODEL, чтобы блок перестал быть прозрачным в мире
+        return RenderShape.MODEL;
     }
 
-    // Подключаем тикер, чтобы жернова могли "думать" и перемалывать ячмень
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

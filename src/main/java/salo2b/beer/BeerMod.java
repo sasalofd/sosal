@@ -43,6 +43,9 @@ public class BeerMod {
     public static class ClientEvents {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            // Регистрация вала
+            event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
+            // Регистрация РОТОРА (проверь, есть ли эта строка!)
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
         }
     }
@@ -74,6 +77,7 @@ public class BeerMod {
                         output.accept(ModBlocks.WINDMILL_ROTOR.get());
                         output.accept(ModBlocks.WINDMILL_SHAFT.get());
                         output.accept(ModBlocks.MILLSTONE.get());
+                        output.accept(ModItems.CRUSHED_MALT.get());
                     })
                     .build());
 
@@ -84,6 +88,7 @@ public class BeerMod {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_SAPLING.get(), RenderType.cutout());
         });
     }
+
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
         event.register((state, world, pos, tintIndex) -> 0x3F76E4, ModBlocks.BREWERY.get());

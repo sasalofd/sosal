@@ -72,6 +72,8 @@ public class BeerMod {
                         output.accept(ModItems.BREWERY_ITEM.get());
                         // Добавляем ротор в креатив, чтобы его можно было взять
                         output.accept(ModBlocks.WINDMILL_ROTOR.get());
+                        output.accept(ModBlocks.WINDMILL_SHAFT.get());
+                        output.accept(ModBlocks.MILLSTONE.get());
                     })
                     .build());
 

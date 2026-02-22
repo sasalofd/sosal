@@ -31,6 +31,15 @@ public class ModBlockEntities {
             BLOCK_ENTITIES.register("malt_vat_be", () ->
                     BlockEntityType.Builder.of(MaltVatBlockEntity::new, ModBlocks.MALT_VAT.get()).build(null));
 
+    // Це реєструє "мозок" для жерновів
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MillstoneBlockEntity>> MILLSTONE =
+            BLOCK_ENTITIES.register("millstone",
+                    () -> BlockEntityType.Builder.of(MillstoneBlockEntity::new, ModBlocks.MILLSTONE.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WindmillShaftBlockEntity>> WINDMILL_SHAFT =
+            BLOCK_ENTITIES.register("windmill_shaft",
+                    () -> BlockEntityType.Builder.of(WindmillShaftBlockEntity::new, ModBlocks.WINDMILL_SHAFT.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

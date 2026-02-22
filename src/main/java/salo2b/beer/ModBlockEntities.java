@@ -11,6 +11,11 @@ public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, BeerMod.MODID);
 
+    // Регистрация сущности для ротора мельницы
+    public static final Supplier<BlockEntityType<WindmillRotorBlockEntity>> WINDMILL_ROTOR =
+            BLOCK_ENTITIES.register("windmill_rotor",
+                    () -> BlockEntityType.Builder.of(WindmillRotorBlockEntity::new, ModBlocks.WINDMILL_ROTOR.get()).build(null));
+
     // Регистрация Бочки
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BeerBarrelBlockEntity>> BEER_BARREL_BE =
             BLOCK_ENTITIES.register("beer_barrel_be", () ->
@@ -21,6 +26,7 @@ public class ModBlockEntities {
             BLOCK_ENTITIES.register("brewery_be", () ->
                     BlockEntityType.Builder.of(BreweryBlockEntity::new, ModBlocks.BREWERY.get()).build(null));
 
+    // Регистрация Чана для солода
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MaltVatBlockEntity>> MALT_VAT_BE =
             BLOCK_ENTITIES.register("malt_vat_be", () ->
                     BlockEntityType.Builder.of(MaltVatBlockEntity::new, ModBlocks.MALT_VAT.get()).build(null));

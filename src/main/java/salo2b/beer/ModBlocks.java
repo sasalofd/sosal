@@ -76,6 +76,9 @@ public class ModBlocks {
     public static final DeferredBlock<Block> FILTERED_BEER = BLOCKS.register("filtered_beer",
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
+    public static final DeferredBlock<Block> WINDMILL_ROTOR = registerBlock("windmill_rotor",
+            () -> new WindmillRotorBlock(BlockBehaviour.Properties.of().noOcclusion().strength(3.0f)));
+
     public static final DeferredBlock<Block> MALT_VAT = registerBlock("malt_vat",
             () -> new MaltVatBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CAULDRON)));
     public static final DeferredBlock<Block> BARLEY_CROP = BLOCKS.register("barley_crop",

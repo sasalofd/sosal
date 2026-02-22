@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "beer:block/windmill_rotor" },
+    "facing=south": { "model": "beer:block/windmill_rotor", "y": 180 },
+    "facing=east": { "model": "beer:block/windmill_rotor", "y": 90 },
+    "facing=west": { "model": "beer:block/windmill_rotor", "y": 270 }
+  }
+}

@@ -2,6 +2,7 @@ package salo2b.beer;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -28,29 +29,34 @@ public class MillstoneBlock extends BaseEntityBlock {
         return CODEC;
     }
 
+    // Теперь при клике открывается интерфейс (Menu)
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
-            ItemStack itemInHand = player.getItemInHand(hand);
-            ItemStack outputSlot = millstone.inventory.getStackInSlot(1);
-
-            // 1. Если в выходном слоте что-то есть — отдаем игроку СРАЗУ (даже если в руке что-то есть)
-            if (!outputSlot.isEmpty()) {
-                ItemStack extracted = millstone.inventory.extractItem(1, 64, false);
-                if (!player.addItem(extracted)) {
-                    player.drop(extracted, false);
-                }
-                return ItemInteractionResult.SUCCESS;
-            }
-
-            // 2. Если выход пуст и в руке СОЛОД — кладем его во вход
-            if (itemInHand.is(ModItems.MALT.get())) {
-                ItemStack remaining = millstone.inventory.insertItem(0, itemInHand.copy(), false);
-                player.setItemInHand(hand, remaining);
-                return ItemInteractionResult.SUCCESS;
+        if (!level.isClientSide) {
+            BlockEntity entity = level.getBlockEntity(pos);
+            if (entity instanceof MillstoneBlockEntity millstone) {
+                // Используем openMenu — NeoForge сам подхватит BlockPos
+                // из-за реализации MenuProvider в BlockEntity
+                player.openMenu(millstone, pos);
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ItemInteractionResult.SUCCESS;
+    }
+
+    // Метод, чтобы предметы выпадали при разрушении блока
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (state.getBlock() != newState.getBlock()) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof MillstoneBlockEntity millstone) {
+                // Выбрасываем всё из внутреннего инвентаря
+                for (int i = 0; i < millstone.inventory.getSlots(); i++) {
+                    Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), millstone.inventory.getStackInSlot(i));
+                }
+                level.updateNeighbourForOutputSignal(pos, this);
+            }
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
     }
 
     @Nullable
@@ -61,7 +67,6 @@ public class MillstoneBlock extends BaseEntityBlock {
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        // Меняем на MODEL, чтобы блок перестал быть прозрачным в мире
         return RenderShape.MODEL;
     }
 

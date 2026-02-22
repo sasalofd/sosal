@@ -10,12 +10,14 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus; // Поправленный импорт для Bus.MOD
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import java.util.function.Supplier;
 
 @Mod(BeerMod.MODID)
@@ -31,6 +33,7 @@ public class BeerMod {
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        ModMenuTypes.MENUS.register(modEventBus); // Регистрация типов меню
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
@@ -38,15 +41,18 @@ public class BeerMod {
         }
     }
 
-    // Правильная регистрация рендера для NeoForge 1.21.1
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, bus = Bus.MOD, value = Dist.CLIENT)
     public static class ClientEvents {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            // Регистрация вала
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
-            // Регистрация РОТОРА (проверь, есть ли эта строка!)
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
+        }
+
+        // ВАЖНО: Регистрация экрана жерновов
+        @SubscribeEvent
+        public static void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+            event.register(ModMenuTypes.MILLSTONE_MENU.get(), MillstoneScreen::new);
         }
     }
 
@@ -73,11 +79,12 @@ public class BeerMod {
                         output.accept(ModItems.FILTERED_BEER.get());
                         output.accept(ModItems.LIGHT_BEER.get());
                         output.accept(ModItems.BREWERY_ITEM.get());
-                        // Добавляем ротор в креатив, чтобы его можно было взять
                         output.accept(ModBlocks.WINDMILL_ROTOR.get());
                         output.accept(ModBlocks.WINDMILL_SHAFT.get());
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
+                        // Добавляем Gearbox в креатив
+                        output.accept(ModBlocks.GEARBOX.get());
                     })
                     .build());
 
@@ -88,7 +95,6 @@ public class BeerMod {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_SAPLING.get(), RenderType.cutout());
         });
     }
-
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
         event.register((state, world, pos, tintIndex) -> 0x3F76E4, ModBlocks.BREWERY.get());

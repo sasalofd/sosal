@@ -21,7 +21,7 @@ public class WindmillRotorRenderer implements BlockEntityRenderer<WindmillRotorB
     public void render(WindmillRotorBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         BlockState state = entity.getBlockState();
 
-        // Проверка на наличие свойства FACING
+        // Защита от вылета
         if (!state.hasProperty(WindmillRotorBlock.FACING)) return;
 
         Direction facing = state.getValue(WindmillRotorBlock.FACING);
@@ -29,20 +29,29 @@ public class WindmillRotorRenderer implements BlockEntityRenderer<WindmillRotorB
 
         poseStack.pushPose();
 
-        // 1. Центрируем вращение в блоке
+        // 1. Сдвигаем в центр блока
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        // 2. Поворачиваем "камеру" рендера в сторону блока (по оси Y)
+        // 2. Поворачиваем всю сцену "лицом" к игроку. (+180 градусов компенсации)
         float rotationY = facing.toYRot();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY + 180));
 
-        // 3. Крутим лопасти вокруг оси Z (теперь Z всегда смотрит на игрока)
+        // 3. Крутим лопасти вокруг оси Z
         float fluidAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
         poseStack.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
 
-        // 4. Возвращаем координаты в начало для отрисовки модели
+        // ==================================================
+        // УВЕЛИЧИВАЕМ РАЗМЕР ЛОПАСТЕЙ!
+        // Меняй 2.5F на любое другое число (например, 3.0F или 4.0F),
+        // если хочешь сделать их еще больше или немного меньше.
+        // Делаем лопасти по-настоящему огромными!
+        poseStack.scale(5.0F, 5.0F, 5.0F);
+        // ==================================================
+
+        // 4. Возвращаем координаты на место
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 
+        // Отрисовка
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(
                 poseStack.last(),
                 buffer.getBuffer(RenderType.cutout()),

@@ -10,7 +10,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.EventBusSubscriber.Bus; // Поправленный импорт для Bus.MOD
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -33,7 +33,7 @@ public class BeerMod {
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
-        ModMenuTypes.MENUS.register(modEventBus); // Регистрация типов меню
+        ModMenuTypes.MENUS.register(modEventBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
@@ -47,14 +47,16 @@ public class BeerMod {
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
+            // ВАЖНО: Добавляем рендерер жерновов для визуального вращения
+            event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
         }
 
-        // ВАЖНО: Регистрация экрана жерновов
         @SubscribeEvent
-        public static void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
+        public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.MILLSTONE_MENU.get(), MillstoneScreen::new);
-            // Не забудь импортировать MaltVatScreen!
             event.register(ModMenuTypes.MALT_VAT_MENU.get(), MaltVatScreen::new);
+            // Если ты вдруг решишь вернуть GUI пивоварне:
+            // event.register(ModMenuTypes.BREWERY_MENU.get(), BreweryScreen::new);
         }
     }
 
@@ -77,16 +79,18 @@ public class BeerMod {
                         output.accept(ModBlocks.WOODEN_MUG.get());
                         output.accept(ModBlocks.BEER_BARREL.get());
                         output.accept(ModBlocks.MALT_VAT.get());
+                        output.accept(ModBlocks.BREWERY.get()); // Добавил сам блок пивоварни
+                        output.accept(ModItems.WORT_BUCKET.get()); // Ведро сусла
                         output.accept(ModItems.BEER.get());
+                        output.accept(ModItems.CIDER.get()); // Сидр
+                        output.accept(ModItems.BARLEY_BEER.get()); // Ячменное пиво
                         output.accept(ModItems.FILTERED_BEER.get());
                         output.accept(ModItems.LIGHT_BEER.get());
-                        output.accept(ModItems.BREWERY_ITEM.get());
                         output.accept(ModBlocks.WINDMILL_ROTOR.get());
                         output.accept(ModBlocks.WINDMILL_SHAFT.get());
+                        output.accept(ModBlocks.GEARBOX.get());
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
-                        // Добавляем Gearbox в креатив
-                        output.accept(ModBlocks.GEARBOX.get());
                     })
                     .build());
 
@@ -99,8 +103,7 @@ public class BeerMod {
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        // Цвет для пивоварни (синий оттенок)
         event.register((state, world, pos, tintIndex) -> 0x3F76E4, ModBlocks.BREWERY.get());
     }
-
-
 }

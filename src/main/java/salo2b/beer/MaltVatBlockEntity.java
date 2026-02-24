@@ -60,7 +60,7 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
 
     public int waterLevel = 0;      // Текущая вода (0-10)
     public int progress = 0;
-    public int maxProgress = 6000;  // 5 минут = 300 сек * 20 тиков = 6000
+    public int maxProgress = 10;  // 5 минут = 300 сек * 20 тиков = 6000
 
     public MaltVatBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MALT_VAT_BE.get(), pos, state);

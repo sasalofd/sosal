@@ -1,7 +1,6 @@
 package salo2b.beer;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,18 +33,18 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import salo2b.beer.BreweryBlockEntity;
 
 public class BreweryBlock extends BaseEntityBlock {
 
     public static final MapCodec<BreweryBlock> CODEC = simpleCodec(BreweryBlock::new);
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    public static final IntegerProperty WATER_LEVEL = IntegerProperty.create("water_level", 0, 2); // Используем для визуала (0-2)
+    public static final IntegerProperty WATER_LEVEL = IntegerProperty.create("water_level", 0, 2);
     public static final BooleanProperty HAS_BEER = BooleanProperty.create("has_beer");
 
     private static final VoxelShape SHAPE = makeShape();
 
-    // Форма блока (ножки, бак)
     private static VoxelShape makeShape() {
         VoxelShape shape = Shapes.empty();
         shape = Shapes.or(shape, Block.box(0, 0, 0, 16, 2, 16));
@@ -72,7 +71,6 @@ public class BreweryBlock extends BaseEntityBlock {
         pBuilder.add(FACING, WATER_LEVEL, HAS_BEER);
     }
 
-    // --- ВЗАИМОДЕЙСТВИЕ (КЛИКИ) ---
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) return ItemInteractionResult.SUCCESS;
@@ -80,42 +78,31 @@ public class BreweryBlock extends BaseEntityBlock {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof BreweryBlockEntity brewery) {
 
-            // 1. ЗАЛИВАЕМ СУСЛО (Wort Bucket)
+            // 1. ЗАЛИВАЕМ СУСЛО
             if (stack.is(ModItems.WORT_BUCKET.get())) {
                 if (brewery.addWort()) {
                     level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
-                    if (!player.isCreative()) {
-                        player.setItemInHand(hand, new ItemStack(Items.BUCKET));
-                    }
-                    // Обновляем визуал (условно, 1 уровень воды = есть сусло)
-                    level.setBlock(pos, state.setValue(WATER_LEVEL, 1).setValue(HAS_BEER, false), 3);
-                    player.displayClientMessage(Component.literal("§6Сусло добавлено (" + brewery.getWortLevel() + "/10)"), true);
+                    if (!player.isCreative()) player.setItemInHand(hand, new ItemStack(Items.BUCKET));
+                    player.displayClientMessage(Component.literal("§6Сусло добавлено (" + brewery.getWortLevel() + "/6)"), true);
                     return ItemInteractionResult.SUCCESS;
                 }
             }
 
-            // 2. ДОБАВЛЯЕМ ИНГРЕДИЕНТЫ (Хмель, Яблоко, Ячмень)
-            // Проверка идет внутри brewery.addIngredient
+            // 2. ДОБАВЛЯЕМ ИНГРЕДИЕНТЫ
             if (brewery.addIngredient(stack)) {
                 level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
-                if (!player.isCreative()) {
-                    stack.shrink(1);
-                }
+                if (!player.isCreative()) stack.shrink(1);
                 player.displayClientMessage(Component.literal("§aИнгредиент добавлен!"), true);
                 return ItemInteractionResult.SUCCESS;
             }
 
-            // 3. ЗАБИРАЕМ ГОТОВОЕ ПИВО (Кружкой)
+            // 3. ЗАБИРАЕМ ГОТОВОЕ ПИВО
             if (stack.is(ModBlocks.WOODEN_MUG.get().asItem())) {
                 ItemStack result = brewery.takeResult();
                 if (!result.isEmpty()) {
                     level.playSound(null, pos, SoundEvents.GENERIC_DRINK, SoundSource.BLOCKS, 0.5F, 1.0F);
-                    if (!player.isCreative()) {
-                        stack.shrink(1);
-                    }
-                    if (!player.getInventory().add(result)) {
-                        player.drop(result, false);
-                    }
+                    if (!player.isCreative()) stack.shrink(1);
+                    if (!player.getInventory().add(result)) player.drop(result, false);
                     player.displayClientMessage(Component.literal("§6Напиток готов!"), true);
                     return ItemInteractionResult.SUCCESS;
                 }
@@ -123,21 +110,30 @@ public class BreweryBlock extends BaseEntityBlock {
 
             // 4. ПРОВЕРКА СТАТУСА (Пустой рукой)
             if (stack.isEmpty()) {
-                String status = "§7Пусто";
-                if (brewery.getWortLevel() > 0) status = "§6Сусло: " + brewery.getWortLevel();
-                if (brewery.getBrewingStage() > 0 && brewery.getBrewingStage() < 5) status += " §e(Варится...)";
-                if (brewery.getBrewingStage() == 5) status += " §a(Готово!)";
+                // Если пиво готово
+                if (!brewery.getResult().isEmpty()) {
+                    String beerName = brewery.getResult().getHoverName().getString();
+                    player.displayClientMessage(Component.literal("§aГотово: " + beerName + " §e(" + brewery.servings + " порций)"), true);
+                }
+                // Если не готово, показываем сусло и ингредиенты
+                else {
+                    int ingredientCount = brewery.hasIngredient() ? 1 : 0;
+                    String status = "§6Сусла: " + brewery.getWortLevel() + " §7| §eИнгредиентов: " + ingredientCount;
 
-                player.displayClientMessage(Component.literal(status), true);
+                    if (brewery.getBrewingStage() > 0) {
+                        status += " §c(Варится...)";
+                    }
+                    player.displayClientMessage(Component.literal(status), true);
+                }
                 return ItemInteractionResult.SUCCESS;
             }
         }
+
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-        // Дым во время варки
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof BreweryBlockEntity brewery && brewery.getBrewingStage() > 0 && brewery.getBrewingStage() < 5) {
             if (random.nextInt(5) == 0) {
@@ -162,7 +158,6 @@ public class BreweryBlock extends BaseEntityBlock {
         return createTickerHelper(type, ModBlockEntities.BREWERY_BE.get(), BreweryBlockEntity::tick);
     }
 
-    // Остальные методы (getShape, getStateForPlacement) такие же, как были
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPE; }
 

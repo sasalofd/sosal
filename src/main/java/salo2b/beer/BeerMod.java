@@ -53,6 +53,8 @@ public class BeerMod {
         @SubscribeEvent
         public static void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.MILLSTONE_MENU.get(), MillstoneScreen::new);
+            // Не забудь импортировать MaltVatScreen!
+            event.register(ModMenuTypes.MALT_VAT_MENU.get(), MaltVatScreen::new);
         }
     }
 
@@ -99,4 +101,6 @@ public class BeerMod {
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
         event.register((state, world, pos, tintIndex) -> 0x3F76E4, ModBlocks.BREWERY.get());
     }
+
+
 }

@@ -6,6 +6,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemNameBlockItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -59,7 +60,23 @@ public class ModItems {
 
     public static final DeferredItem<Item> HOPS = ITEMS.register("hops",
             () -> new Item(new Item.Properties()));
+    // --- ЖИДКОСТИ ---
+    // --- ВЕДРА И ЖИДКОСТИ ---
+    public static final DeferredHolder<Item, Item> WORT_BUCKET = ITEMS.register("wort_bucket",
+            () -> new Item(new Item.Properties().stacksTo(16))); // Ведро сусла (не стакается)
 
+    // --- НАПИТКИ ---
+    public static final DeferredHolder<Item, Item> CIDER = ITEMS.register("cider",
+            () -> new Item(new Item.Properties().stacksTo(16)
+                    .food(new net.minecraft.world.food.FoodProperties.Builder()
+                            .nutrition(4).saturationModifier(0.3f).alwaysEdible().build())));
+
+    public static final DeferredHolder<Item, Item> BARLEY_BEER = ITEMS.register("barley_beer",
+            () -> new Item(new Item.Properties().stacksTo(16)
+                    .food(new net.minecraft.world.food.FoodProperties.Builder()
+                            .nutrition(5).saturationModifier(0.4f).alwaysEdible().build())));
+
+    // Убедись, что BEER (обычное) и GREEN_APPLE уже есть, или добавь их тоже.
     public static final DeferredItem<Item> BARLEY = ITEMS.register("barley",
             () -> new Item(new Item.Properties()));
 

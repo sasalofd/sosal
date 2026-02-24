@@ -14,4 +14,6 @@ public class ModMenuTypes {
 
     public static final DeferredHolder<MenuType<?>, MenuType<MillstoneMenu>> MILLSTONE_MENU =
             MENUS.register("millstone_menu", () -> IMenuTypeExtension.create(MillstoneMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MaltVatMenu>> MALT_VAT_MENU =
+            MENUS.register("malt_vat_menu", () -> IMenuTypeExtension.create(MaltVatMenu::new));
 }

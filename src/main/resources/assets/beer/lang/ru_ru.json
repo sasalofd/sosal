@@ -29,5 +29,6 @@
   "block.beer.windmill_shaft": "Вал мельницы",
   "block.beer.millstone": "Жернова",
   "block.beer.windmill_rotor": "Ротор мельницы",
+  "entity.minecraft.villager.beer.brewmaster": "Мастер-пивовар",
   "block.beer.apple_fruit_leaves": "Цветущая яблоня"
 }

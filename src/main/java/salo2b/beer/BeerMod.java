@@ -34,6 +34,8 @@ public class BeerMod {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
+        ModVillagers.POI_TYPES.register(modEventBus); // ВАЖНО
+        ModVillagers.PROFESSIONS.register(modEventBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);

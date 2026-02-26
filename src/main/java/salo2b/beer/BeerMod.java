@@ -37,6 +37,7 @@ public class BeerMod {
         ModVillagers.POI_TYPES.register(modEventBus); // ВАЖНО
         ModVillagers.PROFESSIONS.register(modEventBus);
 
+
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
             modEventBus.addListener(this::onClientSetup);
@@ -51,6 +52,11 @@ public class BeerMod {
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
             // ВАЖНО: Добавляем рендерер жерновов для визуального вращения
             event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
+        }
+        // Внутри класса, подписанного на Bus.MOD
+        @SubscribeEvent
+        public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
         }
 
         @SubscribeEvent

@@ -2,49 +2,119 @@ package salo2b.beer;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class BeerBarrelBlockEntity extends BlockEntity {
     private int timer = 0;
     private int mugsCount = 0;
 
-    // СКОРОСТЬ БРОЖЕНИЯ
-    private static final int TIME_FILTERED = 200; // 10 секунд
-    private static final int TIME_LIGHT = 600;    // 30 секунд
+    private static final int TIME_FILTERED = 200;
+    private static final int TIME_LIGHT = 600;
+
+    private static final long EXPLOSION_DELAY = 1000L;
+    public static final long WARNING_PERIOD = 300L;
+    private long targetTime = 0;
+    public boolean isFullOfEliteBeer = false;
 
     public BeerBarrelBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.BEER_BARREL_BE.get(), pos, state);
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, BeerBarrelBlockEntity be) {
-        if (level.isClientSide) return;
+        if (level.isClientSide) {
+            if (be.isFullOfEliteBeer && be.targetTime > 0) {
+                long timeLeft = be.targetTime - level.getGameTime();
+                if (timeLeft <= WARNING_PERIOD && level.random.nextFloat() < 0.2f) {
+                    level.addParticle(ParticleTypes.DRIPPING_WATER, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 0, -0.1, 0);
+                }
+            }
+            return;
+        }
 
-        // Брожение идет, если в бочке есть ХОТЯ БЫ ОДНА кружка
         if (be.mugsCount > 0) {
             be.timer++;
 
-            // Бульканье каждые 3 секунды
+            if (be.timer >= TIME_LIGHT && !be.isFullOfEliteBeer) {
+                be.isFullOfEliteBeer = true;
+                be.targetTime = level.getGameTime() + EXPLOSION_DELAY;
+                be.setChanged();
+                level.sendBlockUpdated(pos, state, state, 3);
+            }
+
+            if (be.isFullOfEliteBeer && be.targetTime > 0) {
+                long timeLeft = be.targetTime - level.getGameTime();
+
+                if (timeLeft <= WARNING_PERIOD && !state.getValue(BeerBarrelBlock.SWOLLEN)) {
+                    level.setBlock(pos, state.setValue(BeerBarrelBlock.SWOLLEN, true), 3);
+                }
+
+                if (level.getGameTime() >= be.targetTime) {
+                    level.explode(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.BLOCK);
+                    level.removeBlock(pos, false);
+                    return;
+                }
+            }
+
             if (be.timer % 60 == 0) {
                 level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.BLOCKS, 0.3f, 0.5f);
             }
         } else {
-            be.timer = 0; // Если бочка пуста, обнуляем прогресс
+            if (state.getValue(BeerBarrelBlock.SWOLLEN)) {
+                level.setBlock(pos, state.setValue(BeerBarrelBlock.SWOLLEN, false), 3);
+            }
+            be.timer = 0;
+            be.isFullOfEliteBeer = false;
+            be.targetTime = 0;
+            be.setChanged();
+            level.sendBlockUpdated(pos, state, state, 3);
         }
     }
+
+    // Метод для получения масштаба (используется в рендерере)
+    public float getExpansionScale(float partialTicks) {
+        if (!isFullOfEliteBeer || targetTime <= 0 || level == null) return 1.0f;
+
+        long timeLeft = targetTime - level.getGameTime();
+        if (timeLeft > WARNING_PERIOD) return 1.0f;
+        if (timeLeft <= 0) return 1.2f;
+
+        // Плавное увеличение от 1.0 до 1.2 по мере приближения к взрыву
+        float progress = 1.0f - ((float)timeLeft - partialTicks) / WARNING_PERIOD;
+        return 1.0f + (Math.max(0, progress) * 0.2f);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    public long getTargetTime() { return targetTime; }
+    public long getWarningPeriod() { return WARNING_PERIOD; }
 
     public boolean addMug() {
         if (this.mugsCount < 10) {
             this.mugsCount++;
-            // Если ты доливаешь свежее пиво, брожение немного замедляется (сбрасывается на 25%)
-            // или оставь таймер как есть, если хочешь, чтобы доливка не мешала.
-            // Давай оставим таймер, чтобы бродить продолжало дальше.
             setChanged();
+            if (this.level != null) this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
             return true;
         }
         return false;
@@ -59,7 +129,13 @@ public class BeerBarrelBlockEntity extends BlockEntity {
         else result = new ItemStack(ModItems.BEER.get());
 
         this.mugsCount--;
+        if (this.mugsCount == 0) {
+            this.isFullOfEliteBeer = false;
+            this.targetTime = 0;
+            this.timer = 0;
+        }
         setChanged();
+        if (this.level != null) this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
         return result;
     }
 
@@ -71,21 +147,15 @@ public class BeerBarrelBlockEntity extends BlockEntity {
         if (timer >= TIME_FILTERED) return "Фильтрованное";
         return "Нефильтрованное";
     }
-    // Добавь эти методы в класс BeerBarrelBlockEntity
 
-    // Определяем, какой предмет сейчас в бочке (зависит от стадии)
     public ItemStack getStageItem() {
         if (timer >= TIME_LIGHT) return new ItemStack(ModItems.LIGHT_BEER.get());
         if (timer >= TIME_FILTERED) return new ItemStack(ModItems.FILTERED_BEER.get());
         return new ItemStack(ModItems.BEER.get());
     }
 
-    // Проверяем, можно ли залить это пиво в бочку
     public boolean canFillWith(ItemStack stack) {
-        // Если бочка пустая, разрешаем заливать только обычное (нефильтрованное) пиво для старта
         if (mugsCount == 0) return stack.is(ModItems.BEER.get());
-
-        // Если в бочке уже есть пиво, разрешаем доливать только тот же сорт
         return stack.is(getStageItem().getItem());
     }
 
@@ -94,6 +164,8 @@ public class BeerBarrelBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putInt("beer.timer", timer);
         tag.putInt("beer.mugs", mugsCount);
+        tag.putLong("beer.target_time", targetTime);
+        tag.putBoolean("beer.is_elite", isFullOfEliteBeer);
     }
 
     @Override
@@ -101,5 +173,7 @@ public class BeerBarrelBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         this.timer = tag.getInt("beer.timer");
         this.mugsCount = tag.getInt("beer.mugs");
+        this.targetTime = tag.getLong("beer.target_time");
+        this.isFullOfEliteBeer = tag.getBoolean("beer.is_elite");
     }
 }

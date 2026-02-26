@@ -1,0 +1,6 @@
+{
+  "parent": "beer:block/beer_barrel",
+  "textures": {
+    "side": "beer:block/beer_barrel_side_swollen"
+  }
+}

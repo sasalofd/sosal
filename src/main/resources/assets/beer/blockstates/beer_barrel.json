@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "beer:block/beer_barrel" }
+    "swollen=false": { "model": "beer:block/beer_barrel" },
+    "swollen=true": { "model": "beer:block/beer_barrel_swollen" }
   }
 }

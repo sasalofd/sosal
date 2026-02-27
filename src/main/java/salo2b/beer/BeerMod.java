@@ -16,6 +16,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import java.util.function.Supplier;
@@ -99,6 +100,7 @@ public class BeerMod {
                         output.accept(ModBlocks.GEARBOX.get());
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
+                        NeoForge.EVENT_BUS.register(ModVillagers.class);
                     })
                     .build());
 

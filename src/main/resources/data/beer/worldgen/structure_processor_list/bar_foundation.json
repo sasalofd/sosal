@@ -1,8 +1,9 @@
 {
   "processors": [
     {
-      "processor_type": "minecraft:cap_entity_health",
-      "limit": 20
+      "processor_type": "minecraft:gravity",
+      "heightmap": "WORLD_SURFACE_WG",
+      "offset": 0
     },
     {
       "processor_type": "minecraft:rule",
@@ -12,24 +13,11 @@
             "predicate_type": "minecraft:always_true"
           },
           "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:air",
-            "probability": 1.0
-          },
-          "output_state": {
-            "Name": "minecraft:dirt"
-          }
-        },
-        {
-          "location_predicate": {
-            "predicate_type": "minecraft:always_true"
-          },
-          "input_predicate": {
             "predicate_type": "minecraft:block_match",
             "block": "minecraft:water"
           },
           "output_state": {
-            "Name": "minecraft:dirt"
+            "Name": "minecraft:stone"
           }
         }
       ]

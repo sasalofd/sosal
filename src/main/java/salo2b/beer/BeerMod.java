@@ -53,6 +53,8 @@ public class BeerMod {
             event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
             // ВАЖНО: Добавляем рендерер жерновов для визуального вращения
             event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
+            // Регистрация обработчика событий в основной шине NeoForge
+            NeoForge.EVENT_BUS.register(ModVillagers.class);
         }
         // Внутри класса, подписанного на Bus.MOD
         @SubscribeEvent

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "salo2b.beer.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BarNpcMixin",
+    "StructurePlacementMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

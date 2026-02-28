@@ -7,7 +7,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "beer:my_cool_bar",
-        "projection": "terrain_matching",
+        "projection": "rigid",
         "processors": "beer:bar_foundation"
       }
     }

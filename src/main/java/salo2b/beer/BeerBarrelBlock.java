@@ -41,9 +41,7 @@ public class BeerBarrelBlock extends BaseEntityBlock {
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        // Если бочка вздута (swollen=true), мы делаем стандартную модель невидимой,
-        // потому что её отрисовкой теперь занимается BeerBarrelRenderer.
-        return state.getValue(SWOLLEN) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
 

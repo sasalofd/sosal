@@ -1,5 +1,16 @@
 package salo2b.beer;
 
+import salo2b.beer.*;
+import salo2b.beer.block.*;
+import salo2b.beer.block.entity.*;
+import salo2b.beer.item.*;
+import salo2b.beer.menu.*;
+import salo2b.beer.registration.*;
+import salo2b.beer.villager.*;
+import salo2b.beer.worldgen.*;
+import salo2b.beer.client.renderer.*;
+import salo2b.beer.client.screen.*;
+
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.Registries;
@@ -9,8 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -19,6 +28,11 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import salo2b.beer.registration.*;
+import salo2b.beer.client.renderer.*;
+import salo2b.beer.client.screen.*;
+import salo2b.beer.villager.*;
+
 import java.util.function.Supplier;
 
 @Mod(BeerMod.MODID)
@@ -35,40 +49,32 @@ public class BeerMod {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
-        ModVillagers.POI_TYPES.register(modEventBus); // ВАЖНО
+        ModVillagers.POI_TYPES.register(modEventBus);
         ModVillagers.PROFESSIONS.register(modEventBus);
 
-
+        // Регистрация событий через Listener (убирает Warning)
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
             modEventBus.addListener(this::onClientSetup);
+            modEventBus.addListener(this::registerRenderers);
+            modEventBus.addListener(this::registerScreens);
         }
+        
+        // Регистрация в основной шине для NPC
+        NeoForge.EVENT_BUS.register(ModVillagers.class);
     }
 
-    @EventBusSubscriber(modid = MODID, bus = Bus.MOD, value = Dist.CLIENT)
-    public static class ClientEvents {
-        @SubscribeEvent
-        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
-            // ВАЖНО: Добавляем рендерер жерновов для визуального вращения
-            event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
-            // Регистрация обработчика событий в основной шине NeoForge
-            NeoForge.EVENT_BUS.register(ModVillagers.class);
-        }
-        // Внутри класса, подписанного на Bus.MOD
-        @SubscribeEvent
-        public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
-        }
+    // Методы регистрации событий без @EventBusSubscriber
+    private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
+    }
 
-        @SubscribeEvent
-        public static void registerScreens(RegisterMenuScreensEvent event) {
-            event.register(ModMenuTypes.MILLSTONE_MENU.get(), MillstoneScreen::new);
-            event.register(ModMenuTypes.MALT_VAT_MENU.get(), MaltVatScreen::new);
-            // Если ты вдруг решишь вернуть GUI пивоварне:
-            // event.register(ModMenuTypes.BREWERY_MENU.get(), BreweryScreen::new);
-        }
+    private void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(ModMenuTypes.MILLSTONE_MENU.get(), MillstoneScreen::new);
+        event.register(ModMenuTypes.MALT_VAT_MENU.get(), MaltVatScreen::new);
     }
 
     public static final Supplier<CreativeModeTab> BEER_TAB = CREATIVE_MODE_TABS.register("beer_tab",
@@ -90,11 +96,11 @@ public class BeerMod {
                         output.accept(ModBlocks.WOODEN_MUG.get());
                         output.accept(ModBlocks.BEER_BARREL.get());
                         output.accept(ModBlocks.MALT_VAT.get());
-                        output.accept(ModBlocks.BREWERY.get()); // Добавил сам блок пивоварни
-                        output.accept(ModItems.WORT_BUCKET.get()); // Ведро сусла
+                        output.accept(ModBlocks.BREWERY.get());
+                        output.accept(ModItems.WORT_BUCKET.get());
                         output.accept(ModItems.BEER.get());
-                        output.accept(ModItems.CIDER.get()); // Сидр
-                        output.accept(ModItems.BARLEY_BEER.get()); // Ячменное пиво
+                        output.accept(ModItems.CIDER.get());
+                        output.accept(ModItems.BARLEY_BEER.get());
                         output.accept(ModItems.FILTERED_BEER.get());
                         output.accept(ModItems.LIGHT_BEER.get());
                         output.accept(ModBlocks.WINDMILL_ROTOR.get());
@@ -102,7 +108,6 @@ public class BeerMod {
                         output.accept(ModBlocks.GEARBOX.get());
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
-                        NeoForge.EVENT_BUS.register(ModVillagers.class);
                     })
                     .build());
 
@@ -115,7 +120,6 @@ public class BeerMod {
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
-        // Цвет для пивоварни (синий оттенок)
         event.register((state, world, pos, tintIndex) -> 0x3F76E4, ModBlocks.BREWERY.get());
     }
 }

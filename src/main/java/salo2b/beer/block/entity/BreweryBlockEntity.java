@@ -22,14 +22,42 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.ItemStackHandler;
+
 public class BreweryBlockEntity extends BlockEntity {
 
-    private int wortLevel = 0;
-    private ItemStack ingredient = ItemStack.EMPTY;
-    private ItemStack result = ItemStack.EMPTY;
+    // Бак для сусла (ВХОД)
+    public final FluidTank tank = new FluidTank(4000) {
+        @Override
+        protected void onContentsChanged() {
+            updateBlockVisuals();
+            setChanged();
+        }
+        @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return stack.getFluid() == ModFluids.WORT_SOURCE.get();
+        }
+    };
+
+    // Слот для ингредиента (хмель, яблоки и т.д.)
+    public final ItemStackHandler inventory = new ItemStackHandler(1) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return stack.is(ModItems.HOPS.get()) ||
+                   stack.is(ModItems.GREEN_APPLE.get()) ||
+                   stack.is(ModItems.BARLEY.get());
+        }
+    };
 
     public int servings = 0;
-
     private int brewTime = 0;
     private static final int MAX_BREW_TIME = 400;
 
@@ -37,151 +65,105 @@ public class BreweryBlockEntity extends BlockEntity {
         super(ModBlockEntities.BREWERY_BE.get(), pos, state);
     }
 
-    public int getWortLevel() { return wortLevel; }
-    public ItemStack getResult() { return result; }
-
-    // НОВЫЙ МЕТОД: Проверяет, есть ли ингредиент внутри (для текста)
-    public boolean hasIngredient() {
-        return !ingredient.isEmpty();
-    }
+    public int getWortLevel() { return tank.getFluidAmount() / 500; } // Для старой логики рендеринга
+    public boolean hasIngredient() { return !inventory.getStackInSlot(0).isEmpty(); }
 
     public int getBrewingStage() {
-        if (!result.isEmpty()) return 5;
         if (brewTime <= 0) return 0;
         float progress = (float) brewTime / MAX_BREW_TIME;
         return (int) (progress * 5) + 1;
     }
 
-    // 1. Добавление сусла
+    // 1. Добавление сусла через ведро (ВРУЧНУЮ)
     public boolean addWort() {
-        if (this.wortLevel < 6 && this.result.isEmpty() && this.brewTime == 0) {
-            this.wortLevel++;
-            updateBlockVisuals(); // Обновляем вид блока сразу
+        if (tank.getSpace() >= 1000 && brewTime == 0) {
+            tank.fill(new FluidStack(ModFluids.WORT_SOURCE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
             return true;
         }
         return false;
     }
 
-    // 2. Добавление ингредиента
+    // --- COMPATIBILITY METHODS ---
     public boolean addIngredient(ItemStack stack) {
-        if (this.ingredient.isEmpty() && this.result.isEmpty() && this.wortLevel > 0) {
-            if (stack.is(ModItems.HOPS.get()) ||
-                    stack.is(ModItems.GREEN_APPLE.get()) ||
-                    stack.is(ModItems.BARLEY.get())) {
-
-                this.ingredient = stack.copy();
-                this.ingredient.setCount(1);
-                setChanged(); // Сохраняем, но визуал блока менять не обязательно (ингредиент не видно снаружи)
-                return true;
-            }
+        if (stack.isEmpty()) return false;
+        ItemStack remainder = inventory.insertItem(0, stack.copy(), false);
+        if (remainder.getCount() < stack.getCount()) {
+            stack.setCount(remainder.getCount());
+            return true;
         }
         return false;
     }
 
-    // 3. Забрать результат (ИСПРАВЛЕНА СИНХРОНИЗАЦИЯ)
     public ItemStack takeResult() {
-        if (!this.result.isEmpty() && this.servings > 0) {
-            ItemStack output = this.result.copy();
-            output.setCount(1);
-
-            this.servings--;
-
-            if (this.servings <= 0) {
-                this.result = ItemStack.EMPTY;
-                this.brewTime = 0;
-                // Если сусла не осталось, сбрасываем всё
-                if (this.wortLevel == 0) {
-                    // Текстура: Пусто
-                }
+        if (servings > 0) {
+            ItemStack output = getResult();
+            if (!output.isEmpty()) {
+                servings--;
+                updateBlockVisuals();
+                return output;
             }
-
-            // ВАЖНО: Принудительно обновляем текстуру блока после взятия
-            updateBlockVisuals();
-            return output;
         }
         return ItemStack.EMPTY;
     }
 
-    // --- ЛОГИКА ВАРКИ ---
-    public static void tick(Level level, BlockPos pos, BlockState state, BreweryBlockEntity be) {
-        if (level.isClientSide) return;
-
-        if (!be.result.isEmpty()) return;
-
-        if (be.wortLevel >= 2 && !be.ingredient.isEmpty()) {
-            be.brewTime++;
-
-            if (be.brewTime % 20 == 0) be.setChanged();
-
-            if (be.brewTime >= MAX_BREW_TIME) {
-                // ВАРКА ЗАКОНЧЕНА
-                be.brewTime = 0;
-                be.wortLevel -= 2;
-
-                if (be.ingredient.is(ModItems.HOPS.get())) {
-                    be.result = new ItemStack(ModItems.BEER.get());
-                } else if (be.ingredient.is(ModItems.GREEN_APPLE.get())) {
-                    be.result = new ItemStack(ModItems.CIDER.get());
-                } else if (be.ingredient.is(ModItems.BARLEY.get())) {
-                    be.result = new ItemStack(ModItems.BARLEY_BEER.get());
-                }
-
-                be.servings = 3;
-                be.ingredient = ItemStack.EMPTY;
-
-                // ВАЖНО: Принудительно ставим текстуру "Есть пиво"
-                be.updateBlockVisuals();
-            }
-        } else {
-            if (be.brewTime > 0) {
-                be.brewTime = 0;
-                be.setChanged();
-            }
+    public ItemStack getResult() {
+        if (servings > 0) {
+            return new ItemStack(ModItems.BEER.get());
         }
+        return ItemStack.EMPTY;
     }
 
-    // Метод для синхронизации текстуры блока с данными
     public void updateBlockVisuals() {
         setChanged();
         if (level != null) {
             BlockState currentState = level.getBlockState(worldPosition);
+            int visualWaterLevel = tank.getFluidAmount() > 0 ? 1 : 0;
+            if (tank.getFluidAmount() >= 3000) visualWaterLevel = 2;
+            boolean hasBeer = servings > 0;
 
-            // Вычисляем визуальный уровень воды (0, 1 или 2) для проперти блока
-            int visualWaterLevel = 0;
-            if (wortLevel > 0) visualWaterLevel = 1; // Если есть хоть немного - показываем уровень 1
-            if (wortLevel >= 8) visualWaterLevel = 2; // Если почти полон - уровень 2
-
-            // Есть ли готовое пиво?
-            boolean hasBeer = !result.isEmpty();
-
-            // Применяем состояние к блоку
             level.setBlock(worldPosition, currentState
                     .setValue(BreweryBlock.WATER_LEVEL, visualWaterLevel)
                     .setValue(BreweryBlock.HAS_BEER, hasBeer), 3);
-
-            // Шлем пакет обновления данных
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, BreweryBlockEntity be) {
+        if (level.isClientSide) return;
+
+        ItemStack ingredient = be.inventory.getStackInSlot(0);
+        
+        // Условие варки: есть жидкость Сусло (минимум 1000mB) и ингредиент, и нет готового пива
+        if (be.tank.getFluidAmount() >= 1000 && !ingredient.isEmpty() && be.servings == 0) {
+            be.brewTime++;
+            if (be.brewTime >= MAX_BREW_TIME) {
+                be.brewTime = 0;
+                be.tank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
+                be.servings = 3; // Выход порций
+                ingredient.shrink(1);
+                be.updateBlockVisuals();
+            }
+        } else {
+            be.brewTime = 0;
         }
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putInt("wortLevel", wortLevel);
+        tag.put("tank", tank.writeToNBT(registries, new CompoundTag()));
+        tag.put("inventory", inventory.serializeNBT(registries));
         tag.putInt("brewTime", brewTime);
         tag.putInt("servings", servings);
-        if (!ingredient.isEmpty()) tag.put("ingredient", ingredient.save(registries));
-        if (!result.isEmpty()) tag.put("result", result.save(registries));
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        wortLevel = tag.getInt("wortLevel");
+        if (tag.contains("tank")) tank.readFromNBT(registries, tag.getCompound("tank"));
+        if (tag.contains("inventory")) inventory.deserializeNBT(registries, tag.getCompound("inventory"));
         brewTime = tag.getInt("brewTime");
         servings = tag.getInt("servings");
-        if (tag.contains("ingredient")) ingredient = ItemStack.parseOptional(registries, tag.getCompound("ingredient"));
-        if (tag.contains("result")) result = ItemStack.parseOptional(registries, tag.getCompound("result"));
     }
 
     @Override

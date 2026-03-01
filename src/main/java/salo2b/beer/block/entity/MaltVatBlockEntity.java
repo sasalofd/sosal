@@ -31,13 +31,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
+
 public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
 
-    // СЛОТЫ:
-    // 0: Дробленый солод (Вход ингредиентов)
-    // 1: Ведро с водой (Чтобы пополнить бак)
-    // 2: Пустое ведро (Чтобы забрать сусло)
-    // 3: Ведро сусла (Выход)
     public final SimpleContainer inventory = new SimpleContainer(4) {
         @Override
         public void setChanged() {
@@ -46,14 +47,80 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
         }
     };
 
-    // Данные для GUI (стрелочка и уровень воды)
+    // Бак для воды (10 ведер = 10000 mB) - ВХОД
+    public final FluidTank waterTank = new FluidTank(10000) {
+        @Override
+        protected void onContentsChanged() {
+            setChanged();
+            if (level != null && !level.isClientSide) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+        @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return stack.getFluid() == net.minecraft.world.level.material.Fluids.WATER;
+        }
+    };
+
+    // Бак для сусла (10 ведер = 10000 mB) - ВЫХОД
+    public final FluidTank wortTank = new FluidTank(10000) {
+        @Override
+        protected void onContentsChanged() {
+            setChanged();
+        }
+    };
+
+    // Комбинированный обработчик для труб (Вход - вода, Выход - сусло)
+    public final IFluidHandler fluidHandler = new IFluidHandler() {
+        @Override
+        public int getTanks() { return 2; }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            return tank == 0 ? waterTank.getFluid() : wortTank.getFluid();
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return tank == 0 ? waterTank.getCapacity() : wortTank.getCapacity();
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            return tank == 0 && stack.getFluid() == net.minecraft.world.level.material.Fluids.WATER;
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            if (resource.getFluid() == net.minecraft.world.level.material.Fluids.WATER) {
+                return waterTank.fill(resource, action);
+            }
+            return 0;
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            if (resource.getFluid() == ModFluids.WORT_SOURCE.get()) {
+                return wortTank.drain(resource, action);
+            }
+            return FluidStack.EMPTY;
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return wortTank.drain(maxDrain, action);
+        }
+    };
+
+    private final IItemHandler itemHandler = new InvWrapper(inventory);
+
     protected final ContainerData data = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
                 case 0 -> MaltVatBlockEntity.this.progress;
                 case 1 -> MaltVatBlockEntity.this.maxProgress;
-                case 2 -> MaltVatBlockEntity.this.waterLevel;
+                case 2 -> MaltVatBlockEntity.this.waterTank.getFluidAmount() / 1000; // Для GUI возвращаем ведра
                 default -> 0;
             };
         }
@@ -62,16 +129,15 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
             switch (index) {
                 case 0 -> MaltVatBlockEntity.this.progress = value;
                 case 1 -> MaltVatBlockEntity.this.maxProgress = value;
-                case 2 -> MaltVatBlockEntity.this.waterLevel = value;
+                case 2 -> {} // Воду через GUI не ставим напрямую
             }
         }
         @Override
         public int getCount() { return 3; }
     };
 
-    public int waterLevel = 0;      // Текущая вода (0-10)
     public int progress = 0;
-    public int maxProgress = 10;  // 5 минут = 300 сек * 20 тиков = 6000
+    public int maxProgress = 10; 
 
     public MaltVatBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MALT_VAT_BE.get(), pos, state);
@@ -80,50 +146,39 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
     public static void tick(Level level, BlockPos pos, BlockState state, MaltVatBlockEntity entity) {
         if (level.isClientSide) return;
 
-        // 1. ПОПОЛНЕНИЕ ВОДЫ (Слот 1)
+        // 1. ПОПОЛНЕНИЕ ВОДЫ ИЗ ВЕДРА В GUI (Слот 1)
         ItemStack waterBucketInput = entity.inventory.getItem(1);
-        if (waterBucketInput.is(Items.WATER_BUCKET) && entity.waterLevel < 10) {
-            // Если в баке есть место -> забираем воду, возвращаем ведро
+        if (waterBucketInput.is(Items.WATER_BUCKET) && entity.waterTank.getSpace() >= 1000) {
             entity.inventory.setItem(1, new ItemStack(Items.BUCKET));
-            entity.waterLevel++;
-            entity.setChanged();
+            entity.waterTank.fill(new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
         }
 
-        // 2. ВАРКА СУСЛА
-        ItemStack inputIngredient = entity.inventory.getItem(0); // Слот с солодом
-        ItemStack emptyBucketSlot = entity.inventory.getItem(2); // Слот для пустого ведра
-        ItemStack outputSlot = entity.inventory.getItem(3);      // Слот выхода
+        ItemStack inputIngredient = entity.inventory.getItem(0); 
+        ItemStack emptyBucketSlot = entity.inventory.getItem(2); 
+        ItemStack outputSlot = entity.inventory.getItem(3);      
 
-        // Проверяем рецепт:
-        // - Нужен CRUSHED_MALT (3 штуки)
-        // - Нужна вода в баке (хотя бы 1 ведро)
-        // - Нужно пустое ведро в слоте 2 (куда залить результат)
-        // - Слот 3 должен быть пуст
         boolean hasIngredients = inputIngredient.is(ModItems.CRUSHED_MALT.get()) && inputIngredient.getCount() >= 3;
-        boolean hasWater = entity.waterLevel >= 1;
-        boolean hasBucket = emptyBucketSlot.is(Items.BUCKET);
-        boolean outputEmpty = outputSlot.isEmpty();
-
-        if (hasIngredients && hasWater && hasBucket && outputEmpty) {
+        boolean hasWater = entity.waterTank.getFluidAmount() >= 1000;
+        
+        // 2. ВАРКА СУСЛА В ЖИДКОСТЬ
+        if (hasIngredients && hasWater && entity.wortTank.getSpace() >= 1000) {
             entity.progress++;
-
-            // Если прошло 5 минут
             if (entity.progress >= entity.maxProgress) {
-                // ПОТРАЧЕНО:
-                inputIngredient.shrink(3);  // -3 Солода
-                entity.waterLevel--;        // -1 Ведро воды из бака
-                emptyBucketSlot.shrink(1);  // -1 Пустое ведро из слота
-
-                // ПОЛУЧЕНО:
-                entity.inventory.setItem(3, new ItemStack(ModItems.WORT_BUCKET.get())); // Ведро сусла
-
+                inputIngredient.shrink(3);
+                entity.waterTank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
+                // Создаем жидкое сусло в баке
+                entity.wortTank.fill(new FluidStack(ModFluids.WORT_SOURCE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
                 entity.progress = 0;
             }
-        } else {
-            // Если условия нарушились (забрали ведро), сбрасываем (или можно уменьшать постепенно)
-            if (entity.progress > 0) {
-                entity.progress = 0;
-            }
+        } else if (entity.progress > 0) {
+            entity.progress = 0;
+        }
+
+        // 3. РАЗЛИВ СУСЛА В ВЕДРА ДЛЯ ИГРОКА (если есть пустое ведро)
+        if (entity.wortTank.getFluidAmount() >= 1000 && emptyBucketSlot.is(Items.BUCKET) && outputSlot.isEmpty()) {
+            entity.wortTank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
+            emptyBucketSlot.shrink(1);
+            entity.inventory.setItem(3, new ItemStack(ModItems.WORT_BUCKET.get()));
         }
 
         entity.setChanged();
@@ -143,7 +198,8 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.createTag(registries));
-        tag.putInt("waterLevel", waterLevel);
+        tag.put("waterTank", waterTank.writeToNBT(registries, new CompoundTag()));
+        tag.put("wortTank", wortTank.writeToNBT(registries, new CompoundTag()));
         tag.putInt("progress", progress);
     }
 
@@ -151,7 +207,12 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.fromTag(tag.getList("inventory", 10), registries);
-        waterLevel = tag.getInt("waterLevel");
+        if (tag.contains("waterTank")) {
+            waterTank.readFromNBT(registries, tag.getCompound("waterTank"));
+        }
+        if (tag.contains("wortTank")) {
+            wortTank.readFromNBT(registries, tag.getCompound("wortTank"));
+        }
         progress = tag.getInt("progress");
     }
 

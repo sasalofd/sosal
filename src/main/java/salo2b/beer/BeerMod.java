@@ -35,6 +35,9 @@ import salo2b.beer.villager.*;
 
 import java.util.function.Supplier;
 
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+
 @Mod(BeerMod.MODID)
 public class BeerMod {
     public static final String MODID = "beer";
@@ -47,6 +50,8 @@ public class BeerMod {
         ModDataComponents.DATA_COMPONENT_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        ModFluids.FLUID_TYPES.register(modEventBus);
+        ModFluids.FLUIDS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
         ModVillagers.POI_TYPES.register(modEventBus);
@@ -59,9 +64,37 @@ public class BeerMod {
             modEventBus.addListener(this::registerRenderers);
             modEventBus.addListener(this::registerScreens);
         }
+
+        modEventBus.addListener(this::registerCapabilities);
         
         // Регистрация в основной шине для NPC
         NeoForge.EVENT_BUS.register(ModVillagers.class);
+    }
+
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        // --- MALT VAT ---
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.MALT_VAT_BE.get(),
+                (be, side) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be.inventory)
+        );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.MALT_VAT_BE.get(),
+                (be, side) -> be.fluidHandler
+        );
+
+        // --- BREWERY ---
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.BREWERY_BE.get(),
+                (be, side) -> be.inventory
+        );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.BREWERY_BE.get(),
+                (be, side) -> be.tank
+        );
     }
 
     // Методы регистрации событий без @EventBusSubscriber

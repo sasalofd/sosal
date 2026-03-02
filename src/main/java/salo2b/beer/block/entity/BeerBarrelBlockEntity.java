@@ -22,6 +22,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -47,25 +48,44 @@ public class BeerBarrelBlockEntity extends BlockEntity {
 
     public static void tick(Level level, BlockPos pos, BlockState state, BeerBarrelBlockEntity be) {
         if (level.isClientSide) {
+            // --- ЭМБИЕНТ-ЗВУКИ (Только на клиенте) ---
+            
+            // 1. Бульканье (очень тихое и редкое, слышно только в упор)
+            if (be.mugsCount > 0 && level.getGameTime() % 160 == 0) {
+                Player nearestPlayer = level.getNearestPlayer(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0, false);
+                if (nearestPlayer != null) {
+                    level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 
+                        SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.1f, 0.5f, false);
+                }
+            }
+
             if (be.isFullOfEliteBeer && be.targetTime > 0) {
                 long timeLeft = be.targetTime - level.getGameTime();
                 
-                // СТРУИ ПЕРЕД ВЗРЫВОМ (Брызги меда)
-                if (timeLeft <= WARNING_PERIOD && timeLeft > 0 && level.random.nextFloat() < 0.8f) {
-                    double angle = level.random.nextDouble() * Math.PI * 2;
-                    double verticalAngle = (level.random.nextDouble() - 0.5) * Math.PI;
-                    
-                    double speed = 0.5 + level.random.nextDouble() * 0.6;
-                    
-                    double vx = Math.cos(angle) * Math.cos(verticalAngle) * speed;
-                    double vy = Math.sin(verticalAngle) * speed + 0.3; 
-                    double vz = Math.sin(angle) * Math.cos(verticalAngle) * speed;
+                if (timeLeft <= WARNING_PERIOD && timeLeft > 0) {
+                    // 2. Постоянное тихое шипение вздутой бочки
+                    if (level.getGameTime() % 40 == 0) {
+                        level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 
+                            SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.07f, 0.6f, false);
+                    }
 
-                    level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.HONEY_BLOCK.defaultBlockState()), 
-                        pos.getX() + 0.5 + Math.cos(angle) * 0.45, 
-                        pos.getY() + 0.5 + Math.sin(verticalAngle) * 0.45, 
-                        pos.getZ() + 0.5 + Math.sin(angle) * 0.45, 
-                        vx, vy, vz);
+                    // СТРУИ ПЕРЕД ВЗРЫВОМ (Брызги меда)
+                    if (level.random.nextFloat() < 0.8f) {
+                        double angle = level.random.nextDouble() * Math.PI * 2;
+                        double verticalAngle = (level.random.nextDouble() - 0.5) * Math.PI;
+                        
+                        double speed = 0.5 + level.random.nextDouble() * 0.6;
+                        
+                        double vx = Math.cos(angle) * Math.cos(verticalAngle) * speed;
+                        double vy = Math.sin(verticalAngle) * speed + 0.3; 
+                        double vz = Math.sin(angle) * Math.cos(verticalAngle) * speed;
+
+                        level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.HONEY_BLOCK.defaultBlockState()), 
+                            pos.getX() + 0.5 + Math.cos(angle) * 0.45, 
+                            pos.getY() + 0.5 + Math.sin(verticalAngle) * 0.45, 
+                            pos.getZ() + 0.5 + Math.sin(angle) * 0.45, 
+                            vx, vy, vz);
+                    }
                 }
             }
             return;
@@ -88,15 +108,6 @@ public class BeerBarrelBlockEntity extends BlockEntity {
                     level.setBlock(pos, state.setValue(BeerBarrelBlock.SWOLLEN, true), 3);
                 }
 
-                if (timeLeft <= WARNING_PERIOD) {
-                    if (be.timer % 40 == 0) {
-                        level.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 0.4f, 0.4f);
-                    }
-                    if (timeLeft < 100 && be.timer % 15 == 0) {
-                        level.playSound(null, pos, SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.5f, 0.5f);
-                    }
-                }
-
                 if (level.getGameTime() >= be.targetTime) {
                     // МОЩНЫЙ ВСПЛЕСК ПАРТИКЛОВ В МОМЕНТ ВЗРЫВА
                     if (level instanceof ServerLevel serverLevel) {
@@ -109,10 +120,6 @@ public class BeerBarrelBlockEntity extends BlockEntity {
                     level.removeBlock(pos, false);
                     return;
                 }
-            }
-
-            if (be.timer % 60 == 0) {
-                level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.3f, 0.5f);
             }
         } else {
             if (state.getValue(BeerBarrelBlock.SWOLLEN)) {

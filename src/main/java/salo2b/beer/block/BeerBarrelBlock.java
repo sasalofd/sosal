@@ -114,7 +114,6 @@ public class BeerBarrelBlock extends BaseEntityBlock {
                 // Если вздута (за 15 сек до взрыва)
                 if (barrel.isFullOfEliteBeer && timeLeft > 0 && timeLeft <= barrel.getWarningPeriod()) {
                     player.displayClientMessage(Component.literal("§c⚠ БОЧКА ВЗДУТА! §e" + barrel.getStageName() + " §7[" + barrel.getMugsCount() + "/10]"), true);
-                    level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5f, 0.5f);
                 } else {
                     // Обычный короткий статус
                     player.displayClientMessage(Component.literal("§e" + barrel.getStageName() + " §7[" + barrel.getMugsCount() + "/10]"), true);

@@ -38,16 +38,18 @@ public class WindmillShaftRenderer implements BlockEntityRenderer<WindmillShaftB
         poseStack.pushPose();
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        // 1. Считаем угол ОДИН раз (без дублей!)
-        float fluidAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
+        // 1. Считаем угол ОДИН раз
+        float renderAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
+        // Если вал подключен к коробке передач, инвертируем угол
+        if (entity.isFlipped) renderAngle = -renderAngle;
 
         if (facing.getAxis() == Direction.Axis.Y) {
-            // 2. Инвертируем вращение для вертикали (ставим минус)
-            poseStack.mulPose(Axis.YP.rotationDegrees(-fluidAngle));
+            // Для вертикали
+            poseStack.mulPose(Axis.YP.rotationDegrees(-renderAngle));
         } else {
             float rotationY = facing.toYRot();
             poseStack.mulPose(Axis.YP.rotationDegrees(-rotationY));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(renderAngle));
         }
 
         poseStack.translate(-0.5D, -0.5D, -0.5D);

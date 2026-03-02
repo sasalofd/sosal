@@ -37,8 +37,7 @@ public class MillstoneRenderer implements BlockEntityRenderer<MillstoneBlockEnti
         // 1. Центрируем вращение (середина блока по X и Z)
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        // 2. Вращаем вокруг оси Y (вертикальная ось)
-        // Берем угол из BlockEntity, который меняется, когда внутри есть ячмень
+        // 2. Вращаем вокруг оси Y
         float fluidAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
         poseStack.mulPose(Axis.YP.rotationDegrees(fluidAngle));
 

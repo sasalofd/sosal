@@ -20,6 +20,7 @@ public class WindmillShaftBlockEntity extends BlockEntity {
     public float angle = 0;
     public float prevAngle = 0;
     public boolean isPowered = false;
+    public boolean isFlipped = false;
 
     public WindmillShaftBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WINDMILL_SHAFT.get(), pos, state);
@@ -28,9 +29,16 @@ public class WindmillShaftBlockEntity extends BlockEntity {
     public static void tick(Level level, BlockPos pos, BlockState state, WindmillShaftBlockEntity entity) {
         entity.prevAngle = entity.angle;
 
-        // Каждые 20 тиков (1 секунда) перепроверяем питание более тщательно
         if (level.getGameTime() % 20 == 0) {
             entity.isPowered = isPoweredBySource(level, pos, state);
+            // Проверяем, не подключены ли мы к Gearbox напрямую
+            entity.isFlipped = false;
+            for (Direction dir : Direction.values()) {
+                if (level.getBlockState(pos.relative(dir)).is(ModBlocks.GEARBOX.get())) {
+                    entity.isFlipped = true;
+                    break;
+                }
+            }
         }
 
         if (entity.isPowered) {

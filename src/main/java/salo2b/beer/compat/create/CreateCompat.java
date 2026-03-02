@@ -317,7 +317,7 @@ public class CreateCompat {
             float angle = (time * speed * 1f / 10f) % 360;
             ms.pushPose();
             ms.translate(0.5f, 0.5f, 0.5f);
-            ms.mulPose(Axis.YP.rotationDegrees(angle));
+            ms.mulPose(Axis.YP.rotationDegrees(-angle));
             ms.translate(-0.5f, -0.5f, -0.5f);
             Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ms.last(), buffer.getBuffer(RenderType.cutout()), state, model, 1.0F, 1.0F, 1.0F, light, overlay, ModelData.EMPTY, null);
             ms.popPose();

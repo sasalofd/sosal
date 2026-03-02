@@ -29,11 +29,15 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(BeerMod.MODID);
 
-    // Блок хмеля (фермерский)
-    public static final DeferredBlock<Block> HOPS_CROP = BLOCKS.register("hops_crop",
-            () -> new HopsCropBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT).noOcclusion().noCollission()));
+    // Решетка для хмеля
+    public static final DeferredBlock<Block> LATTICE = registerBlock("lattice",
+            () -> new LatticeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).noOcclusion()));
 
-    // ДИКИЙ ХМЕЛЬ (Оставил один, правильный вариант)
+    // Блок хмеля (лиана)
+    public static final DeferredBlock<Block> HOPS_VINE = BLOCKS.register("hops_vine",
+            () -> new HopsVineBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).sound(SoundType.GRASS).noOcclusion()));
+
+    // Дикий хмель
     public static final DeferredBlock<Block> WILD_HOPS = registerBlock("wild_hops",
             () -> new WildHopsBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS)
                     .noCollission()

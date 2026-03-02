@@ -1,0 +1,6 @@
+{
+  "parent": "beer:block/hops_vine_base",
+  "textures": {
+    "hops": "beer:block/hops_crop_stage3"
+  }
+}

@@ -140,6 +140,7 @@ public class BeerMod {
                         output.accept(ModBlocks.APPLE_LOG.get());
                         output.accept(ModBlocks.APPLE_LEAVES.get());
                         output.accept(ModBlocks.APPLE_FRUIT_LEAVES.get());
+                        output.accept(ModBlocks.LATTICE.get());
                         output.accept(ModBlocks.WOODEN_MUG.get());
                         output.accept(ModBlocks.BEER_BARREL.get());
                         output.accept(ModBlocks.MALT_VAT.get());
@@ -163,6 +164,8 @@ public class BeerMod {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_LEAVES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_FRUIT_LEAVES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_SAPLING.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.LATTICE.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.HOPS_VINE.get(), RenderType.cutout());
         });
     }
 

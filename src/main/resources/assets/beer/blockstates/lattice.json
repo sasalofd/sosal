@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "waterlogged=false": { "model": "beer:block/lattice" },
+    "waterlogged=true": { "model": "beer:block/lattice" }
+  }
+}

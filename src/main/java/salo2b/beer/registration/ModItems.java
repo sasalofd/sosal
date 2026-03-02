@@ -3,6 +3,7 @@ package salo2b.beer.registration;
 import salo2b.beer.BeerMod;
 import salo2b.beer.item.BeerItem;
 import salo2b.beer.item.BeerMugItem;
+import salo2b.beer.item.HopsSeedsItem;
 import salo2b.beer.item.WetBarleyItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -61,7 +62,7 @@ public class ModItems {
 
     // Остальные предметы без изменений
     public static final DeferredItem<Item> HOPS_SEEDS = ITEMS.register("hops_seeds",
-            () -> new ItemNameBlockItem(ModBlocks.HOPS_CROP.get(), new Item.Properties()));
+            () -> new HopsSeedsItem(new Item.Properties()));
 
     public static final DeferredItem<Item> HOPS = ITEMS.register("hops",
             () -> new Item(new Item.Properties()));

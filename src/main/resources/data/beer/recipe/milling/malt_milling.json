@@ -1,0 +1,15 @@
+{
+  "type": "create:milling",
+  "ingredients": [
+    {
+      "item": "beer:malt"
+    }
+  ],
+  "results": [
+    {
+      "id": "beer:crushed_malt",
+      "count": 1
+    }
+  ],
+  "processing_time": 150
+}

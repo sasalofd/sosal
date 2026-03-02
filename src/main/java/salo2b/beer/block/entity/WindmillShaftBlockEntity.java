@@ -1,25 +1,20 @@
 package salo2b.beer.block.entity;
 
-import salo2b.beer.*;
-import salo2b.beer.block.*;
-import salo2b.beer.block.entity.*;
-import salo2b.beer.item.*;
-import salo2b.beer.menu.*;
-import salo2b.beer.registration.*;
-import salo2b.beer.villager.*;
-import salo2b.beer.worldgen.*;
-import salo2b.beer.client.renderer.*;
-import salo2b.beer.client.screen.*;
-
+import salo2b.beer.block.WindmillShaftBlock;
+import salo2b.beer.registration.ModBlockEntities;
+import salo2b.beer.registration.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class WindmillShaftBlockEntity extends BlockEntity {
     public float angle = 0;
@@ -33,30 +28,13 @@ public class WindmillShaftBlockEntity extends BlockEntity {
     public static void tick(Level level, BlockPos pos, BlockState state, WindmillShaftBlockEntity entity) {
         entity.prevAngle = entity.angle;
 
-        // ПРОВЕРКА ПИТАНИЯ ДЛЯ ВСЕХ (и для сервера, и для клиента)
-        // Теперь твой экран сам понимает, что нужно запустить анимацию!
-        boolean currentPower = false;
-
-        if (state.hasProperty(WindmillShaftBlock.FACING)) {
-            Direction facing = state.getValue(WindmillShaftBlock.FACING);
-            // Ищем источник энергии СЗАДИ вала
-            BlockPos sourcePos = pos.relative(facing.getOpposite());
-            BlockEntity sourceEntity = level.getBlockEntity(sourcePos);
-
-            if (sourceEntity instanceof WindmillRotorBlockEntity) {
-                currentPower = true;
-            } else if (sourceEntity instanceof WindmillShaftBlockEntity backShaft) {
-                currentPower = backShaft.isPowered;
-            } else if (sourceEntity instanceof GearboxBlockEntity gearbox) {
-                if (gearbox.isPowered(level, sourcePos)) currentPower = true;
-            }
+        // Каждые 20 тиков (1 секунда) перепроверяем питание более тщательно
+        if (level.getGameTime() % 20 == 0) {
+            entity.isPowered = isPoweredBySource(level, pos, state);
         }
 
-        entity.isPowered = currentPower;
-
-        // АНИМАЦИЯ
         if (entity.isPowered) {
-            entity.angle += 2.0F; // Скорость (должна совпадать с ротором)
+            entity.angle += 2.0F;
             if (entity.angle >= 360) {
                 entity.angle -= 360;
                 entity.prevAngle -= 360;
@@ -64,11 +42,33 @@ public class WindmillShaftBlockEntity extends BlockEntity {
         }
     }
 
-    public boolean isSpinning() {
-        return this.isPowered;
+    private static boolean isPoweredBySource(Level level, BlockPos pos, BlockState state) {
+        // Проверяем всех соседей на наличие источника энергии
+        for (Direction dir : Direction.values()) {
+            if (checkPowerRecursive(level, pos.relative(dir), 0, new HashSet<>())) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    // --- СОХРАНЕНИЕ ---
+    private static boolean checkPowerRecursive(Level level, BlockPos currentPos, int distance, Set<BlockPos> visited) {
+        if (distance > 16 || visited.contains(currentPos)) return false;
+        visited.add(currentPos);
+
+        BlockState state = level.getBlockState(currentPos);
+        if (state.is(ModBlocks.WINDMILL_ROTOR.get())) return true;
+
+        if (state.is(ModBlocks.WINDMILL_SHAFT.get()) || state.is(ModBlocks.GEARBOX.get())) {
+            for (Direction dir : Direction.values()) {
+                if (checkPowerRecursive(level, currentPos.relative(dir), distance + 1, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -83,9 +83,7 @@ public class WindmillShaftBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
-        return tag;
+        return saveWithoutMetadata(registries);
     }
 
     @Nullable

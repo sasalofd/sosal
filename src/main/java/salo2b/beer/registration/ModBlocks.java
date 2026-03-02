@@ -83,7 +83,9 @@ public class ModBlocks {
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> MILLSTONE = registerBlock("millstone",
-            () -> new MillstoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.5f).sound(SoundType.STONE)));
+            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+                    salo2b.beer.compat.create.CreateCompat.createMillstone() :
+                    new MillstoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.5f).sound(SoundType.STONE)));
 
     public static final DeferredBlock<Block> LIGHT_BEER = BLOCKS.register("light_beer",
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
@@ -92,11 +94,15 @@ public class ModBlocks {
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> GEARBOX = registerBlock("gearbox",
-            () -> new GearboxBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).noOcclusion()));
+            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+                    salo2b.beer.compat.create.CreateCompat.createGearbox() :
+                    new GearboxBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).noOcclusion()));
 
 
     public static final DeferredBlock<Block> WINDMILL_ROTOR = registerBlock("windmill_rotor",
-            () -> new WindmillRotorBlock(BlockBehaviour.Properties.of().noOcclusion().strength(3.0f)));
+            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+                    salo2b.beer.compat.create.CreateCompat.createRotor() :
+                    new WindmillRotorBlock(BlockBehaviour.Properties.of().noOcclusion().strength(3.0f)));
 
 
 
@@ -108,7 +114,9 @@ public class ModBlocks {
                     .instabreak()));
     // Добавь это в список своих блоков
     public static final DeferredBlock<Block> WINDMILL_SHAFT = registerBlock("windmill_shaft",
-            () -> new WindmillShaftBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.WOOD).strength(2.0f)));
+            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+                    salo2b.beer.compat.create.CreateCompat.createShaft() :
+                    new WindmillShaftBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.WOOD).strength(2.0f)));
     // Вспомогательный метод для регистрации блока вместе с предметом
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

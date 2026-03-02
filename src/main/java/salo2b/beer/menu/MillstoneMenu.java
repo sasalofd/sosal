@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class MillstoneMenu extends AbstractContainerMenu {
-    public final MillstoneBlockEntity blockEntity;
+    public final IMillstoneBE blockEntity;
     private final ContainerData data;
 
     public MillstoneMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
@@ -29,13 +29,13 @@ public class MillstoneMenu extends AbstractContainerMenu {
 
     public MillstoneMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
         super(ModMenuTypes.MILLSTONE_MENU.get(), id);
-        this.blockEntity = (MillstoneBlockEntity) entity;
+        this.blockEntity = (IMillstoneBE) entity;
         this.data = data;
 
         // Слот 0: Вход (Солод)
-        this.addSlot(new SlotItemHandler(blockEntity.inventory, 0, 56, 35));
+        this.addSlot(new SlotItemHandler(blockEntity.getInventory(), 0, 56, 35));
         // Слот 1: Выход (Дробленый солод)
-        this.addSlot(new SlotItemHandler(blockEntity.inventory, 1, 116, 35));
+        this.addSlot(new SlotItemHandler(blockEntity.getInventory(), 1, 116, 35));
 
         addPlayerInventory(inv);
         addPlayerHotbar(inv);

@@ -63,11 +63,19 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        name = "Create Maven"
+        url = "https://maven.createmod.net"
+    }
 }
 
 dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    
+    // Create Mod Compatibility (Soft Dependency)
+    implementation "com.simibubi.create:create-${minecraft_version}:${create_version}"
+    implementation "net.createmod.ponder:ponder-neoforge:1.0.81+mc1.21.1"
 }
 
 tasks.withType(ProcessResources).configureEach {

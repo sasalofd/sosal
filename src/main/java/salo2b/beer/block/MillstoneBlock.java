@@ -65,22 +65,52 @@ public class MillstoneBlock extends BaseEntityBlock {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    // В 1.21.1 рекомендуется использовать useWithoutItem для открытия меню,
-    // если не важен предмет в руке
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof MillstoneBlockEntity millstone) {
-                player.openMenu(millstone, pos);
+                ItemStack output = millstone.inventory.getStackInSlot(1);
+                ItemStack input = millstone.inventory.getStackInSlot(0);
+
+                if (!output.isEmpty()) {
+                    // Забираем результат
+                    player.getInventory().add(output.copy());
+                    millstone.inventory.setStackInSlot(1, ItemStack.EMPTY);
+                    millstone.setChanged();
+                    level.sendBlockUpdated(pos, state, state, 3);
+                    return InteractionResult.SUCCESS;
+                } else if (!input.isEmpty()) {
+                    // Забираем входной предмет и сбрасываем прогресс
+                    player.getInventory().add(input.copy());
+                    millstone.inventory.setStackInSlot(0, ItemStack.EMPTY);
+                    millstone.progress = 0;
+                    millstone.setChanged();
+                    level.sendBlockUpdated(pos, state, state, 3);
+                    return InteractionResult.SUCCESS;
+                }
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    // Для совместимости оставляем заглушку useItemOn
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (!level.isClientSide) {
+            BlockEntity entity = level.getBlockEntity(pos);
+            if (entity instanceof MillstoneBlockEntity millstone) {
+                // ПРОВЕРКА: принимаем только солод или ячмень
+                if (!stack.isEmpty() && (stack.is(ModItems.MALT.get()) || stack.is(ModItems.BARLEY.get()))) {
+                    ItemStack remainder = millstone.inventory.insertItem(0, stack.copy(), false);
+                    if (remainder.getCount() < stack.getCount()) {
+                        player.setItemInHand(hand, remainder);
+                        millstone.setChanged();
+                        level.sendBlockUpdated(pos, state, state, 3);
+                        return ItemInteractionResult.SUCCESS;
+                    }
+                }
+            }
+        }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
@@ -113,6 +143,6 @@ public class MillstoneBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlockEntities.MILLSTONE.get(), MillstoneBlockEntity::tick);
+        return createTickerHelper(type, (BlockEntityType<MillstoneBlockEntity>)(Object)ModBlockEntities.MILLSTONE.get(), MillstoneBlockEntity::tick);
     }
 }

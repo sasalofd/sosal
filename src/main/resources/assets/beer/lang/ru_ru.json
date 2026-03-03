@@ -1,4 +1,9 @@
 {
+  "effect.beer.drunk": "Опьянение",
+  "effect.beer.mild_drunk": "Слабое опьянение",
+  "effect.beer.strong_drunk": "Сильное опьянение",
+  "effect.beer.hangover": "Похмелье",
+  "effect.beer.blackout": "Помутнение",
   "itemGroup.beer_tab": "Пивомир",
   "item.beer.hops_seeds": "Семена хмеля",
   "item.beer.hops": "Хмель",

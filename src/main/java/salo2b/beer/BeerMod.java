@@ -48,6 +48,7 @@ public class BeerMod {
     public BeerMod(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
         ModDataComponents.DATA_COMPONENT_TYPES.register(modEventBus);
+        ModEffects.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModFluids.FLUID_TYPES.register(modEventBus);
@@ -67,8 +68,9 @@ public class BeerMod {
 
         modEventBus.addListener(this::registerCapabilities);
         
-        // Регистрация в основной шине для NPC
+        // Регистрация в основной шине для NPC и эффектов
         NeoForge.EVENT_BUS.register(ModVillagers.class);
+        NeoForge.EVENT_BUS.register(salo2b.beer.effect.DrunkennessEvents.class);
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

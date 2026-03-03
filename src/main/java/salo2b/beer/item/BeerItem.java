@@ -11,6 +11,7 @@ import salo2b.beer.worldgen.*;
 import salo2b.beer.client.renderer.*;
 import salo2b.beer.client.screen.*;
 
+import salo2b.beer.effect.DrunkEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,10 +38,8 @@ public class BeerItem extends Item {
         ItemStack resultStack = super.finishUsingItem(stack, level, entity);
 
         // 2. Накладываем эффекты
-        if (!level.isClientSide) {
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0)); // Тошнота (10 сек)
-            entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100, 0)); // Слепота
-            entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 0));  // Тьма
+        if (!level.isClientSide && entity instanceof Player player) {
+            DrunkEffect.drink(player);
         }
 
         // 3. Логика возврата кружки

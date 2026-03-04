@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "age=0": { "model": "beer:block/blooming_salt_stage0" },
+    "age=1": { "model": "beer:block/blooming_salt_stage1" },
+    "age=2": { "model": "beer:block/blooming_salt_stage2" },
+    "age=3": { "model": "beer:block/blooming_salt_stage3" }
+  }
+}

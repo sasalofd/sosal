@@ -121,6 +121,13 @@ public class ModBlocks {
             () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createShaft() :
                     new WindmillShaftBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.WOOD).strength(2.0f)));
+
+    public static final DeferredBlock<Block> SALT_BLOCK = registerBlock("salt_block",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).mapColor(MapColor.SNOW).strength(1.5f, 3.0f).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final DeferredBlock<Block> BLOOMING_SALT_BLOCK = registerBlock("blooming_salt_block",
+            () -> new salo2b.beer.block.salt.BloomingSaltBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).mapColor(MapColor.SNOW).randomTicks().strength(0.2f, 0.2f).sound(SoundType.STONE).requiresCorrectToolForDrops().lightLevel(state -> 10)));
+
     // Вспомогательный метод для регистрации блока вместе с предметом
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

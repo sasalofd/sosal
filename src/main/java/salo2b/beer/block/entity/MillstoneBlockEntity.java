@@ -64,17 +64,42 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
                 entity.prevAngle -= 360f;
             }
 
-            if (!level.isClientSide && !input.isEmpty() && canInsertResult(output)) {
-                entity.progress++;
-                if (entity.progress >= entity.MAX_PROGRESS) {
-                    entity.craftItem();
-                    entity.progress = 0;
+            if (!level.isClientSide && !input.isEmpty()) {
+                ItemStack result = getResult(input);
+                if (!result.isEmpty() && canInsertResult(output, result)) {
+                    entity.progress++;
+                    int maxProgress = input.is(ModItems.SALT_CRYSTAL.get()) ? 300 : entity.MAX_PROGRESS;
+                    if (entity.progress >= maxProgress) {
+                        entity.craftItem(result);
+                        entity.progress = 0;
+                    }
                 }
             }
         } else if (!level.isClientSide && entity.progress > 0) {
             entity.progress = 0;
             level.sendBlockUpdated(pos, state, state, 3);
         }
+    }
+
+    private static ItemStack getResult(ItemStack input) {
+        if (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) {
+            return new ItemStack(ModItems.CRUSHED_MALT.get());
+        }
+        if (input.is(ModItems.SALT_CRYSTAL.get())) {
+            return new ItemStack(ModItems.SALT.get());
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static boolean canInsertResult(ItemStack output, ItemStack result) {
+        return output.isEmpty() || (ItemStack.isSameItem(output, result) && output.getCount() < output.getMaxStackSize());
+    }
+
+    private void craftItem(ItemStack result) {
+        ItemStack input = inventory.getStackInSlot(0);
+        input.shrink(1);
+        inventory.insertItem(1, result, false);
+        setChanged();
     }
 
     private static boolean isPoweredByRotor(Level level, BlockPos pos, BlockState state) {
@@ -102,20 +127,6 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
             }
         }
         return false;
-    }
-
-    private static boolean canInsertResult(ItemStack output) {
-        return output.isEmpty() || (output.is(ModItems.CRUSHED_MALT.get()) && output.getCount() < output.getMaxStackSize());
-    }
-
-    private void craftItem() {
-        ItemStack input = inventory.getStackInSlot(0);
-        if (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) {
-            input.shrink(1);
-            ItemStack result = new ItemStack(ModItems.CRUSHED_MALT.get());
-            inventory.insertItem(1, result, false);
-            setChanged();
-        }
     }
 
     @Override

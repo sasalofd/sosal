@@ -18,7 +18,11 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class ModConfiguredFeatures {
     // Создаем ключ для нашей яблони
-    public static final ResourceKey<ConfiguredFeature<?, ?>> APPLE_TREE =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE,
+    public static final ResourceKey<ConfiguredFeature<?, ?>> APPLE_TREE = 
+            ResourceKey.create(Registries.CONFIGURED_FEATURE, 
                     ResourceLocation.fromNamespaceAndPath(BeerMod.MODID, "apple_tree"));
-}
+
+    public static final ResourceKey<ConfiguredFeature<?, ?>> SALT_SPIKE = 
+            ResourceKey.create(Registries.CONFIGURED_FEATURE, 
+                    ResourceLocation.fromNamespaceAndPath(BeerMod.MODID, "salt_spike"));
+    }

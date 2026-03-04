@@ -37,5 +37,10 @@
   "block.beer.windmill_rotor": "Ротор мельницы",
   "entity.minecraft.villager.beer.brewmaster": "Мастер-пивовар",
   "block.beer.apple_fruit_leaves": "Цветущая яблоня",
-  "block.beer.lattice": "Хмелевая решетка"
+  "block.beer.lattice": "Хмелевая решетка",
+  "item.beer.salt": "Соль",
+  "block.beer.salt_block": "Блок соли",
+  "block.beer.blooming_salt_block": "Расцветающий соляной блок",
+  "block.beer.salt_crystal": "Кристалл соли",
+  "item.beer.salt_crystal_item": "Кристалл соли"
 }

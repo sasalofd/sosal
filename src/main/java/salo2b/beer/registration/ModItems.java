@@ -102,4 +102,10 @@ public class ModItems {
 
     public static final DeferredItem<Item> CRUSHED_MALT = ITEMS.register("crushed_malt",
             () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> SALT = ITEMS.register("salt",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> SALT_CRYSTAL = ITEMS.register("salt_crystal_item",
+            () -> new Item(new Item.Properties()));
 }

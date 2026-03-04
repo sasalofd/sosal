@@ -47,6 +47,7 @@ public class BeerMod {
 
     public BeerMod(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
+        ModFeatures.register(modEventBus);
         ModDataComponents.DATA_COMPONENT_TYPES.register(modEventBus);
         ModEffects.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
@@ -158,6 +159,9 @@ public class BeerMod {
                         output.accept(ModBlocks.GEARBOX.get());
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
+                        output.accept(ModItems.SALT.get());
+                        output.accept(ModBlocks.SALT_BLOCK.get());
+                        output.accept(ModBlocks.BLOOMING_SALT_BLOCK.get());
                     })
                     .build());
 

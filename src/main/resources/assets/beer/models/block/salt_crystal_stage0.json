@@ -1,0 +1,21 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "minecraft:block/amethyst_cluster",
+    "cross": "minecraft:block/amethyst_cluster"
+  },
+  "elements": [
+    {
+      "from": [7, 0, 7],
+      "to": [9, 3, 9],
+      "faces": {
+        "down":  { "uv": [7, 7, 9, 9], "texture": "#cross", "cullface": "down" },
+        "up":    { "uv": [7, 7, 9, 9], "texture": "#cross" },
+        "north": { "uv": [7, 13, 9, 16], "texture": "#cross" },
+        "south": { "uv": [7, 13, 9, 16], "texture": "#cross" },
+        "west":  { "uv": [7, 13, 9, 16], "texture": "#cross" },
+        "east":  { "uv": [7, 13, 9, 16], "texture": "#cross" }
+      }
+    }
+  ]
+}

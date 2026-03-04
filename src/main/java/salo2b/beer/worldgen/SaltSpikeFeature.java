@@ -28,17 +28,18 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
         BlockPos pos = context.origin();
         RandomSource random = context.random();
 
-        if (pos.getY() > 20) return false;
+        if (pos.getY() > 50) return false;
 
-        for (int i = 0; i < 8; i++) {
-            BlockPos currentPos = pos.offset(random.nextInt(16) - 8, random.nextInt(16) - 8, random.nextInt(16) - 8);
+        for (int i = 0; i < 128; i++) {
+            BlockPos currentPos = pos.offset(random.nextInt(32) - 16, random.nextInt(16) - 8, random.nextInt(32) - 16);
             
             if (isValidCeilingLocation(level, currentPos)) {
+                // Дистанция 25 блоков для редкости
                 if (isTooCloseToOtherSalt(level, currentPos)) continue;
                 
                 int caveHeight = getCaveHeight(level, currentPos);
-                if (caveHeight > 10) {
-                    generateAdaptiveGlacier(level, currentPos, random, caveHeight);
+                if (caveHeight >= 8) {
+                    generateSharpAdaptiveGlacier(level, currentPos, random, caveHeight);
                     return true;
                 }
             }
@@ -47,85 +48,108 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
         return false;
     }
 
-    private void generateAdaptiveGlacier(WorldGenLevel level, BlockPos topPos, RandomSource random, int caveHeight) {
+    private void generateSharpAdaptiveGlacier(WorldGenLevel level, BlockPos topPos, RandomSource random, int caveHeight) {
         BlockState salt = ModBlocks.SALT_BLOCK.get().defaultBlockState();
         
-        // Масштабируем параметры под высоту пещеры
-        boolean isGiant = caveHeight > 25;
-        int maxHeight = isGiant ? 10 + random.nextInt(8) : 4 + random.nextInt(4);
-        int startRadius = isGiant ? 3 : 2;
+        boolean isGiant = caveHeight > 30;
+        boolean isMedium = caveHeight > 15;
+        
+        int maxHeight = isGiant ? 18 + random.nextInt(15) : (isMedium ? 7 + random.nextInt(5) : 4 + random.nextInt(3));
+        maxHeight = Math.min(maxHeight, caveHeight - 2);
         
         List<BlockPos> placedPositions = new ArrayList<>();
+        int waterH = -1;
 
-        // 1. Генерация тела пика
+        // 1. Генерация тела (ЦЕНТР ВСЕГДА ЦЕЛЬНЫЙ)
         for (int h = 0; h < maxHeight; h++) {
-            // Динамический радиус: широкое основание, медленное сужение
             double progress = (double) h / maxHeight;
             int radius;
+            
             if (isGiant) {
-                if (progress < 0.2) radius = 3;
+                if (progress < 0.25) radius = 3;
                 else if (progress < 0.5) radius = 2;
-                else if (progress < 0.8) radius = 1;
+                else if (progress < 0.75) radius = 1;
                 else radius = 0;
             } else {
-                if (progress < 0.3) radius = 2;
-                else if (progress < 0.7) radius = 1;
+                if (progress < 0.3) radius = 2; 
+                else if (progress < 0.6) radius = 1; 
                 else radius = 0;
             }
             
+            if (h >= maxHeight - 1) radius = 0;
+
+            if (waterH == -1 && radius >= 1 && h >= 2) {
+                waterH = h;
+            }
+
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
-                    if (x * x + z * z <= radius * radius + random.nextInt(2)) {
-                        BlockPos p = topPos.offset(x, -h, z);
-                        
-                        if (h < 2 && !isAttached(level, p)) continue;
+                    // ЦЕНТРАЛЬНЫЙ СТЕРЖЕНЬ (x=0, z=0) СТАВИМ ВСЕГДА
+                    boolean isCenter = (x == 0 && z == 0);
+                    
+                    if (!isCenter) {
+                        // Шум только для боковых блоков
+                        if (random.nextFloat() < 0.2f) continue;
+                        double d = x * x + z * z;
+                        if (d > radius * radius + random.nextFloat() * 0.8) continue;
+                    }
 
-                        if (isReplaceable(level, p)) {
-                            // Вода внутри верхней части
-                            if (h == 1 && x == 0 && z == 0) {
-                                level.setBlock(p, Blocks.WATER.defaultBlockState(), 2);
-                            } else {
-                                level.setBlock(p, salt, 2);
-                                placedPositions.add(p);
-                            }
-                        }
+                    BlockPos p = topPos.offset(x, -h, z);
+                    if (isReplaceable(level, p)) {
+                        if (h == waterH && isCenter) continue; // Место для воды
+                        
+                        level.setBlock(p, salt, 2);
+                        placedPositions.add(p);
                     }
                 }
             }
         }
 
-        // 2. Спутники для неровности (у гигантов их больше)
-        int satellites = (isGiant ? 4 : 2) + random.nextInt(3);
-        for (int i = 0; i < satellites; i++) {
-            Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-            int dist = isGiant ? 2 + random.nextInt(2) : 1 + random.nextInt(2);
-            int sHeight = 1 + random.nextInt(isGiant ? 6 : 3);
-            BlockPos sStart = topPos.relative(dir, dist).below(random.nextInt(3));
-            
-            for (int h = 0; h < sHeight; h++) {
-                BlockPos p = sStart.below(h);
-                if (isReplaceable(level, p) && isAttached(level, p)) {
+        // 2. Размещение ВОДЫ
+        if (waterH != -1) {
+            BlockPos waterPos = topPos.below(waterH);
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                BlockPos p = waterPos.relative(dir);
+                if (level.getBlockState(p).isAir() || level.getBlockState(p).is(Blocks.WATER)) {
                     level.setBlock(p, salt, 2);
                     placedPositions.add(p);
                 }
             }
+            level.setBlock(waterPos, Blocks.WATER.defaultBlockState(), 2);
         }
 
-        // 3. Размещение точек роста (Blooming Salt)
+        // 3. Спутники (всегда прикреплены к телу)
+        int satellites = (isGiant ? 5 : 2) + random.nextInt(2);
+        for (int i = 0; i < satellites; i++) {
+            Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+            int dist = (isGiant) ? 2 : 1;
+            BlockPos sStart = topPos.relative(dir, dist).below(random.nextInt(5));
+            
+            if (isReplaceable(level, sStart)) {
+                int sHeight = 2 + random.nextInt(maxHeight / 2);
+                for (int h = 0; h < sHeight; h++) {
+                    if (random.nextFloat() < 0.1f) continue;
+                    BlockPos p = sStart.below(h);
+                    if (isReplaceable(level, p)) {
+                        level.setBlock(p, salt, 2);
+                        placedPositions.add(p);
+                    }
+                }
+            }
+        }
+
+        // 4. Точки роста
         if (!placedPositions.isEmpty()) {
-            // Для гигантов ставим несколько точек на концах
-            if (isGiant) {
-                placedPositions.sort((a, b) -> Integer.compare(a.getY(), b.getY()));
-                int bloomCount = 2 + random.nextInt(3);
-                for (int i = 0; i < Math.min(bloomCount, placedPositions.size()); i++) {
-                    level.setBlock(placedPositions.get(i), ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState().setValue(BloomingSaltBlock.AGE, 0), 2);
+            placedPositions.sort((a, b) -> Integer.compare(a.getY(), b.getY()));
+            level.setBlock(placedPositions.get(0), ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState().setValue(BloomingSaltBlock.AGE, 0), 2);
+            
+            if (isGiant || maxHeight > 10) {
+                int extraPoints = isGiant ? 3 : 1;
+                for (int i = 1; i <= extraPoints && i < placedPositions.size(); i++) {
+                    if (placedPositions.get(i).getY() < topPos.getY() - (maxHeight / 3)) {
+                        level.setBlock(placedPositions.get(i), ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState().setValue(BloomingSaltBlock.AGE, 0), 2);
+                    }
                 }
-            } else {
-                BlockPos lowest = topPos;
-                for (BlockPos p : placedPositions) {
-                    if (p.getY() < lowest.getY()) lowest = p;
-                }
-                level.setBlock(lowest, ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState().setValue(BloomingSaltBlock.AGE, 0), 2);
             }
         }
     }
@@ -133,7 +157,7 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
     private int getCaveHeight(WorldGenLevel level, BlockPos pos) {
         int h = 0;
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos().set(pos);
-        while (h < 40) {
+        while (h < 64) {
             mutable.move(Direction.DOWN);
             if (!level.isEmptyBlock(mutable) && !level.getBlockState(mutable).is(Blocks.WATER)) break;
             h++;
@@ -141,16 +165,9 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
         return h;
     }
 
-    private boolean isAttached(WorldGenLevel level, BlockPos pos) {
-        for (Direction dir : Direction.values()) {
-            BlockState adj = level.getBlockState(pos.relative(dir));
-            if (adj.isSolid() || adj.is(ModBlocks.SALT_BLOCK.get())) return true;
-        }
-        return false;
-    }
-
     private boolean isTooCloseToOtherSalt(WorldGenLevel level, BlockPos pos) {
-        for (BlockPos checkPos : BlockPos.betweenClosed(pos.offset(-15, -10, -15), pos.offset(15, 10, 15))) {
+        // Дистанция 25 блоков
+        for (BlockPos checkPos : BlockPos.betweenClosed(pos.offset(-25, -10, -25), pos.offset(25, 10, 25))) {
             if (level.getBlockState(checkPos).is(ModBlocks.SALT_BLOCK.get()) || level.getBlockState(checkPos).is(ModBlocks.BLOOMING_SALT_BLOCK.get())) {
                 return true;
             }
@@ -165,7 +182,7 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
 
     private boolean isValidCeilingLocation(WorldGenLevel level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (!state.is(BlockTags.BASE_STONE_OVERWORLD)) return false;
+        if (!state.is(BlockTags.BASE_STONE_OVERWORLD) && !state.is(BlockTags.BASE_STONE_NETHER) && !state.is(Blocks.DEEPSLATE)) return false;
         return level.isEmptyBlock(pos.below()) || level.getBlockState(pos.below()).is(Blocks.WATER);
     }
 }

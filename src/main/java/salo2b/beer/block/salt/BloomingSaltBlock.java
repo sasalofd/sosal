@@ -30,7 +30,6 @@ public class BloomingSaltBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Растет только если рядом есть вода (в радиусе 2 блоков)
         if (!isNearWater(level, pos)) return;
 
         int age = state.getValue(AGE);
@@ -39,6 +38,7 @@ public class BloomingSaltBlock extends Block {
                 level.setBlock(pos, state.setValue(AGE, age + 1), 2);
             }
         } else {
+            // Шанс наполнения котла как у капельника
             if (random.nextFloat() < 0.17578125f) {
                 maybeFillCauldron(level, pos);
             }
@@ -78,10 +78,11 @@ public class BloomingSaltBlock extends Block {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (state.getValue(AGE) == 3) {
+            // Капает ровно из центра нижней грани
             if (random.nextInt(10) == 0) {
-                double x = pos.getX() + random.nextDouble();
+                double x = pos.getX() + 0.5D;
                 double y = pos.getY() - 0.05D;
-                double z = pos.getZ() + random.nextDouble();
+                double z = pos.getZ() + 0.5D;
                 level.addParticle(ParticleTypes.DRIPPING_WATER, x, y, z, 0.0D, 0.0D, 0.0D);
             }
         }

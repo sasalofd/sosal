@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "beer:item/crushed_malt"
+    "layer0": "minecraft:item/gunpowder"
   }
 }

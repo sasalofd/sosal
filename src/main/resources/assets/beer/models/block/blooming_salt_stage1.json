@@ -1,6 +1,35 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
   "textures": {
-    "all": "beer:block/salt_block_stage1"
-  }
+    "particle": "minecraft:block/calcite",
+    "base": "minecraft:block/calcite",
+    "salt": "minecraft:block/quartz_block_side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "down":  { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "down" },
+        "up":    { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "up" },
+        "north": { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "north" },
+        "south": { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "south" },
+        "west":  { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "west" },
+        "east":  { "uv": [0, 0, 16, 16], "texture": "#base", "cullface": "east" }
+      }
+    },
+    {
+      "from": [3, 3, 3],
+      "to": [13, 13, 13],
+      "shade": false,
+      "faces": {
+        "down":  { "uv": [3, 3, 13, 13], "texture": "#salt" },
+        "up":    { "uv": [3, 3, 13, 13], "texture": "#salt" },
+        "north": { "uv": [3, 3, 13, 13], "texture": "#salt" },
+        "south": { "uv": [3, 3, 13, 13], "texture": "#salt" },
+        "west":  { "uv": [3, 3, 13, 13], "texture": "#salt" },
+        "east":  { "uv": [3, 3, 13, 13], "texture": "#salt" }
+      }
+    }
+  ]
 }

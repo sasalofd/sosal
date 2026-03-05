@@ -160,6 +160,7 @@ public class BeerMod {
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
                         output.accept(ModItems.SALT.get());
+                        output.accept(ModItems.SALT_CRYSTAL.get());
                         output.accept(ModBlocks.SALT_BLOCK.get());
                         output.accept(ModBlocks.BLOOMING_SALT_BLOCK.get());
                     })
@@ -170,9 +171,11 @@ public class BeerMod {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_LEAVES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_FRUIT_LEAVES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.APPLE_SAPLING.get(), RenderType.cutout());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.LATTICE.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.BARLEY_CROP.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HOPS_VINE.get(), RenderType.cutout());
-        });
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.SALT_CRYSTAL.get(), RenderType.cutout());
+            });
+
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {

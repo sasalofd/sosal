@@ -89,15 +89,39 @@ public class SaltSpikeFeature extends Feature<NoneFeatureConfiguration> {
             placedPositions.sort((a, b) -> Integer.compare(a.getY(), b.getY()));
             int bloomCount = isGiant ? 3 : 1;
             for (int i = 0; i < Math.min(bloomCount, placedPositions.size()); i++) {
-                BlockPos p = placedPositions.get(i);
-                level.setBlock(p, ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState(), 2);
-                
-                // Сразу растим кристалл вниз
-                BlockPos crystalPos = p.below();
-                if (level.isEmptyBlock(crystalPos) || level.getBlockState(crystalPos).is(Blocks.WATER)) {
-                    level.setBlock(crystalPos, ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
+                // Основной Blooming блок на самом кончике
+                BlockPos tip = placedPositions.get(i);
+                level.setBlock(tip, ModBlocks.BLOOMING_SALT_BLOCK.get().defaultBlockState(), 2);
+
+                // 1. Всегда растим кристалл ВНИЗ (100% шанс)
+                BlockPos downPos = tip.below();
+                if (level.isEmptyBlock(downPos) || level.getBlockState(downPos).is(Blocks.WATER)) {
+                    BlockState downState = ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
                             .setValue(SaltCrystalBlock.FACING, Direction.DOWN)
-                            .setValue(SaltCrystalBlock.AGE, random.nextInt(4)), 2);
+                            .setValue(SaltCrystalBlock.AGE, random.nextInt(4))
+                            .setValue(SaltCrystalBlock.WATERLOGGED, level.getBlockState(downPos).is(Blocks.WATER));
+                    if (downState.canSurvive(level, downPos)) {
+                        level.setBlock(downPos, downState, 2);
+                    }
+                }
+
+                // 2. Растим кристаллы на остальных случайных гранях (кроме нижней)
+                for (Direction dir : Direction.values()) {
+                    if (dir == Direction.DOWN) continue; // Нижний уже обработан
+                    
+                    if (random.nextFloat() < 0.2f) { // 20% шанс для остальных граней
+                        BlockPos crystalPos = tip.relative(dir);
+                        if (level.isEmptyBlock(crystalPos) || level.getBlockState(crystalPos).is(Blocks.WATER)) {
+                            BlockState crystalState = ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
+                                    .setValue(SaltCrystalBlock.FACING, dir)
+                                    .setValue(SaltCrystalBlock.AGE, random.nextInt(4))
+                                    .setValue(SaltCrystalBlock.WATERLOGGED, level.getBlockState(crystalPos).is(Blocks.WATER));
+
+                            if (crystalState.canSurvive(level, crystalPos)) {
+                                level.setBlock(crystalPos, crystalState, 2);
+                            }
+                        }
+                    }
                 }
             }
         }

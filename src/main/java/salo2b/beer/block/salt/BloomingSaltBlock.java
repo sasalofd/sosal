@@ -16,19 +16,62 @@ public class BloomingSaltBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Растем только если рядом вода
         if (!isNearWater(level, pos)) return;
 
-        // Шанс роста кристаллов на гранях (шанс 1 к 5)
-        if (random.nextInt(5) == 0) {
-            Direction dir = Direction.getRandom(random);
+        // Добавляем шанс 50%, чтобы замедлить общий рост
+        if (random.nextBoolean()) return;
+
+        // 1. Проверяем нижнюю грань в приоритете
+        BlockPos downPos = pos.below();
+        BlockState downState = level.getBlockState(downPos);
+        if (!downState.is(ModBlocks.SALT_CRYSTAL.get())) {
+            if (downState.isAir() || downState.is(net.minecraft.world.level.block.Blocks.WATER)) {
+                BlockState crystalState = ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
+                        .setValue(SaltCrystalBlock.FACING, Direction.DOWN)
+                        .setValue(SaltCrystalBlock.AGE, 0)
+                        .setValue(SaltCrystalBlock.WATERLOGGED, downState.is(net.minecraft.world.level.block.Blocks.WATER));
+                
+                if (crystalState.canSurvive(level, downPos)) {
+                    level.setBlock(downPos, crystalState, 3);
+                    return; // В этом тике достаточно
+                }
+            }
+        }
+
+        // 2. Если снизу уже есть кристалл, пробуем другие грани (лимит 3 всего)
+        int crystalCount = 0;
+        for (Direction dir : Direction.values()) {
+            if (level.getBlockState(pos.relative(dir)).is(ModBlocks.SALT_CRYSTAL.get())) {
+                crystalCount++;
+            }
+        }
+
+        if (crystalCount >= 3) return;
+
+        Direction[] dirs = Direction.values();
+        for (int i = dirs.length - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            Direction temp = dirs[i];
+            dirs[i] = dirs[j];
+            dirs[j] = temp;
+        }
+
+        for (Direction dir : dirs) {
+            if (dir == Direction.DOWN) continue; // Мы его уже проверили
+
             BlockPos crystalPos = pos.relative(dir);
             BlockState currentState = level.getBlockState(crystalPos);
-            
+
             if (currentState.isAir() || currentState.is(net.minecraft.world.level.block.Blocks.WATER)) {
-                level.setBlock(crystalPos, ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
+                BlockState crystalState = ModBlocks.SALT_CRYSTAL.get().defaultBlockState()
                         .setValue(SaltCrystalBlock.FACING, dir)
-                        .setValue(SaltCrystalBlock.AGE, 0), 2);
+                        .setValue(SaltCrystalBlock.AGE, 0)
+                        .setValue(SaltCrystalBlock.WATERLOGGED, currentState.is(net.minecraft.world.level.block.Blocks.WATER));
+                
+                if (crystalState.canSurvive(level, crystalPos)) {
+                    level.setBlock(crystalPos, crystalState, 3);
+                    break;
+                }
             }
         }
     }

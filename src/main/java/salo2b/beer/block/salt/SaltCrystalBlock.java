@@ -68,7 +68,7 @@ public class SaltCrystalBlock extends Block implements SimpleWaterloggedBlock {
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         Direction direction = state.getValue(FACING);
         BlockPos attachedPos = pos.relative(direction.getOpposite());
-        return level.getBlockState(attachedPos).isFaceSturdy(level, attachedPos, direction);
+        return level.getBlockState(attachedPos).is(ModBlocks.BLOOMING_SALT_BLOCK.get());
     }
 
     @Override

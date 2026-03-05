@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "beer:salt_crystal",
+              "properties": {
+                "age": "3"
+              }
+            }
+          ],
+          "name": "beer:salt_crystal_item"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

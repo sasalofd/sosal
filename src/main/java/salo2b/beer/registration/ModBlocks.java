@@ -5,13 +5,7 @@ import salo2b.beer.block.*;
 import salo2b.beer.block.salt.*;
 import salo2b.beer.block.entity.*;
 import salo2b.beer.item.*;
-import salo2b.beer.menu.*;
-import salo2b.beer.registration.*;
-import salo2b.beer.villager.*;
-import salo2b.beer.worldgen.*;
-import salo2b.beer.client.renderer.*;
-import salo2b.beer.client.screen.*;
-
+import salo2b.beer.worldgen.ModConfiguredFeatures;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
@@ -19,6 +13,7 @@ import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -79,7 +74,7 @@ public class ModBlocks {
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> MILLSTONE = registerBlock("millstone",
-            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+            () -> ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createMillstone() :
                     new MillstoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.5f).sound(SoundType.STONE)));
 
@@ -90,12 +85,12 @@ public class ModBlocks {
             () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> GEARBOX = registerBlock("gearbox",
-            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+            () -> ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createGearbox() :
                     new GearboxBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).noOcclusion()));
 
     public static final DeferredBlock<Block> WINDMILL_ROTOR = registerBlock("windmill_rotor",
-            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+            () -> ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createRotor() :
                     new WindmillRotorBlock(BlockBehaviour.Properties.of().noOcclusion().strength(3.0f)));
 
@@ -107,8 +102,13 @@ public class ModBlocks {
                     .noCollission()
                     .instabreak()));
 
+    public static final DeferredBlock<Block> HOPS_CROP = BLOCKS.register("hops_crop",
+            () -> new HopsCropBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT)
+                    .noCollission()
+                    .instabreak()));
+
     public static final DeferredBlock<Block> WINDMILL_SHAFT = registerBlock("windmill_shaft",
-            () -> net.neoforged.fml.ModList.get().isLoaded("create") ?
+            () -> ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createShaft() :
                     new WindmillShaftBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.WOOD).strength(2.0f)));
 

@@ -1,0 +1,15 @@
+{
+  "type": "create:milling",
+  "ingredients": [
+    {
+      "item": "beer:salt_crystal_item"
+    }
+  ],
+  "results": [
+    {
+      "item": "beer:salt",
+      "count": 1
+    }
+  ],
+  "processing_time": 100
+}

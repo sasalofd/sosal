@@ -37,25 +37,17 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
     }
 
     @Override
-    public ItemStackHandler getInventory() {
-        return inventory;
-    }
+    public ItemStackHandler getInventory() { return inventory; }
 
     @Override
-    public BlockPos getBlockPos() {
-        return worldPosition;
-    }
+    public BlockPos getBlockPos() { return worldPosition; }
 
     public static void tick(Level level, BlockPos pos, BlockState state, MillstoneBlockEntity entity) {
         entity.prevAngle = entity.angle;
 
-        // Периодически обновляем статус питания
         if (level.getGameTime() % 20 == 0) {
             entity.isPowered = isPoweredByRotor(level, pos, state);
         }
-
-        ItemStack input = entity.inventory.getStackInSlot(0);
-        ItemStack output = entity.inventory.getStackInSlot(1);
 
         if (entity.isPowered) {
             entity.angle += 3.0F;
@@ -64,14 +56,20 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
                 entity.prevAngle -= 360f;
             }
 
-            if (!level.isClientSide && !input.isEmpty()) {
-                ItemStack result = getResult(input);
-                if (!result.isEmpty() && canInsertResult(output, result)) {
-                    entity.progress++;
-                    int maxProgress = input.is(ModItems.SALT_CRYSTAL.get()) ? 300 : entity.MAX_PROGRESS;
-                    if (entity.progress >= maxProgress) {
-                        entity.craftItem(result);
-                        entity.progress = 0;
+            if (!level.isClientSide) {
+                ItemStack input = entity.inventory.getStackInSlot(0);
+                if (!input.isEmpty()) {
+                    ItemStack result = getResult(input);
+                    if (!result.isEmpty()) {
+                        ItemStack output = entity.inventory.getStackInSlot(1);
+                        if (canInsertResult(output, result)) {
+                            entity.progress++;
+                            if (entity.progress >= entity.MAX_PROGRESS) {
+                                entity.craftItem(result);
+                                entity.progress = 0;
+                                level.sendBlockUpdated(pos, state, state, 3);
+                            }
+                        }
                     }
                 }
             }
@@ -82,23 +80,24 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
     }
 
     private static ItemStack getResult(ItemStack input) {
-        if (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) {
-            return new ItemStack(ModItems.CRUSHED_MALT.get());
-        }
-        if (input.is(ModItems.SALT_CRYSTAL.get())) {
+        if (input.getItem() == ModItems.SALT_CRYSTAL.get()) {
             return new ItemStack(ModItems.SALT.get());
+        }
+        if (input.getItem() == ModItems.MALT.get() || input.getItem() == ModItems.BARLEY.get()) {
+            return new ItemStack(ModItems.CRUSHED_MALT.get());
         }
         return ItemStack.EMPTY;
     }
 
     private static boolean canInsertResult(ItemStack output, ItemStack result) {
-        return output.isEmpty() || (ItemStack.isSameItem(output, result) && output.getCount() < output.getMaxStackSize());
+        if (output.isEmpty()) return true;
+        return ItemStack.isSameItem(output, result) && (output.getCount() + result.getCount()) <= output.getMaxStackSize();
     }
 
     private void craftItem(ItemStack result) {
         ItemStack input = inventory.getStackInSlot(0);
         input.shrink(1);
-        inventory.insertItem(1, result, false);
+        inventory.insertItem(1, result.copy(), false);
         setChanged();
     }
 
@@ -117,7 +116,14 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
         visited.add(currentPos);
 
         BlockState state = level.getBlockState(currentPos);
-        if (state.is(ModBlocks.WINDMILL_ROTOR.get())) return true;
+        BlockEntity be = level.getBlockEntity(currentPos);
+
+        // ПРОВЕРКА РОТОРА: Ищем либо наш блок, либо BlockEntity с флагом isSpinning
+        if (state.is(ModBlocks.WINDMILL_ROTOR.get())) {
+            if (be instanceof WindmillRotorBlockEntity rotor && rotor.isSpinning) return true;
+            // Если Create, он тоже должен возвращать true
+            return true; 
+        }
 
         if (state.is(ModBlocks.WINDMILL_SHAFT.get()) || state.is(ModBlocks.GEARBOX.get())) {
             for (Direction dir : Direction.values()) {
@@ -136,7 +142,9 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
+        return tag;
     }
 
     @Override
@@ -145,6 +153,7 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putInt("progress", progress);
         tag.putBoolean("isPowered", isPowered);
+        tag.putFloat("angle", angle);
     }
 
     @Override
@@ -155,5 +164,7 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
         }
         progress = tag.getInt("progress");
         isPowered = tag.getBoolean("isPowered");
+        angle = tag.getFloat("angle");
+        prevAngle = angle;
     }
 }

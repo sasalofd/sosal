@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "beer:block/gearbox" }
+  }
+}

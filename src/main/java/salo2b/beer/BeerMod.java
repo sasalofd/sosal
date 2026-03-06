@@ -37,6 +37,7 @@ import java.util.function.Supplier;
 
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Mod(BeerMod.MODID)
 public class BeerMod {
@@ -59,7 +60,6 @@ public class BeerMod {
         ModVillagers.POI_TYPES.register(modEventBus);
         ModVillagers.PROFESSIONS.register(modEventBus);
 
-        // Регистрация событий через Listener (убирает Warning)
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::registerBlockColors);
             modEventBus.addListener(this::onClientSetup);
@@ -69,55 +69,32 @@ public class BeerMod {
 
         modEventBus.addListener(this::registerCapabilities);
         
-        // Регистрация в основной шине для NPC и эффектов
         NeoForge.EVENT_BUS.register(ModVillagers.class);
         NeoForge.EVENT_BUS.register(salo2b.beer.effect.DrunkennessEvents.class);
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        // --- MALT VAT ---
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                ModBlockEntities.MALT_VAT_BE.get(),
-                (be, side) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be.inventory)
-        );
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                ModBlockEntities.MALT_VAT_BE.get(),
-                (be, side) -> be.fluidHandler
-        );
-
-        // --- BREWERY ---
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                ModBlockEntities.BREWERY_BE.get(),
-                (be, side) -> be.inventory
-        );
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                ModBlockEntities.MILLSTONE.get(),
-                (be, side) -> {
-                    if (be instanceof salo2b.beer.block.entity.IMillstoneBE millstone) return millstone.getInventory();
-                    return null;
-                }
-        );
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                ModBlockEntities.BREWERY_BE.get(),
-                (be, side) -> be.tank
-        );
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MALT_VAT_BE.get(), (be, side) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be.inventory));
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.MALT_VAT_BE.get(), (be, side) -> be.fluidHandler);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BREWERY_BE.get(), (be, side) -> be.inventory);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MILLSTONE.get(), (be, side) -> {
+            if (be instanceof salo2b.beer.block.entity.IMillstoneBE millstone) return millstone.getInventory();
+            return null;
+        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BREWERY_BE.get(), (be, side) -> be.tank);
     }
 
-    // Методы регистрации событий без @EventBusSubscriber
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         if (net.neoforged.fml.ModList.get().isLoaded("create")) {
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatWindmillShaftBlockEntity>)(Object) ModBlockEntities.WINDMILL_SHAFT.get(), salo2b.beer.compat.create.CreateCompat.CompatWindmillShaftRenderer::new);
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatWindmillRotorBlockEntity>)(Object) ModBlockEntities.WINDMILL_ROTOR.get(), salo2b.beer.compat.create.CreateCompat.CompatWindmillRotorRenderer::new);
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatMillstoneBlockEntity>)(Object) ModBlockEntities.MILLSTONE.get(), salo2b.beer.compat.create.CreateCompat.CompatMillstoneRenderer::new);
+            // Регистрация для КРЕЙТА
+            event.registerBlockEntityRenderer((BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatWindmillShaftBlockEntity>)(Object) ModBlockEntities.WINDMILL_SHAFT.get(), salo2b.beer.compat.create.CreateCompat.CompatWindmillShaftRenderer::new);
+            event.registerBlockEntityRenderer((BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatWindmillRotorBlockEntity>)(Object) ModBlockEntities.WINDMILL_ROTOR.get(), salo2b.beer.compat.create.CreateCompat.CompatWindmillRotorRenderer::new);
+            event.registerBlockEntityRenderer((BlockEntityType<salo2b.beer.compat.create.CreateCompat.CompatMillstoneBlockEntity>)(Object) ModBlockEntities.MILLSTONE.get(), salo2b.beer.compat.create.CreateCompat.CompatMillstoneRenderer::new);
         } else {
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<WindmillShaftBlockEntity>)(Object) ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<WindmillRotorBlockEntity>)(Object) ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
-            event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType<MillstoneBlockEntity>)(Object) ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
+            // Регистрация для ВАНИЛЫ
+            event.registerBlockEntityRenderer((BlockEntityType<WindmillShaftBlockEntity>)(Object) ModBlockEntities.WINDMILL_SHAFT.get(), WindmillShaftRenderer::new);
+            event.registerBlockEntityRenderer((BlockEntityType<WindmillRotorBlockEntity>)(Object) ModBlockEntities.WINDMILL_ROTOR.get(), WindmillRotorRenderer::new);
+            event.registerBlockEntityRenderer((BlockEntityType<MillstoneBlockEntity>)(Object) ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
         }
         event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
     }
@@ -175,7 +152,6 @@ public class BeerMod {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HOPS_VINE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.SALT_CRYSTAL.get(), RenderType.cutout());
             });
-
     }
 
     private void registerBlockColors(RegisterColorHandlersEvent.Block event) {

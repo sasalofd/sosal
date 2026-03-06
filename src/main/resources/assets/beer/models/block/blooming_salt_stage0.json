@@ -3,7 +3,7 @@
   "textures": {
     "particle": "minecraft:block/calcite",
     "base": "minecraft:block/calcite",
-    "salt": "minecraft:block/smooth_quartz"
+    "salt": "minecraft:block/quartz_block_side"
   },
   "elements": [
     {

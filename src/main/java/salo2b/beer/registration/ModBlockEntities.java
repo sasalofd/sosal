@@ -3,22 +3,12 @@ package salo2b.beer.registration;
 import salo2b.beer.*;
 import salo2b.beer.block.*;
 import salo2b.beer.block.entity.*;
-import salo2b.beer.item.*;
-import salo2b.beer.menu.*;
-import salo2b.beer.registration.*;
-import salo2b.beer.villager.*;
-import salo2b.beer.worldgen.*;
-import salo2b.beer.client.renderer.*;
-import salo2b.beer.client.screen.*;
-
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import java.util.function.Supplier;
 
 public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =

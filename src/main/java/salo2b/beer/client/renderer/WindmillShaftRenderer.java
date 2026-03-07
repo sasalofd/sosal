@@ -40,8 +40,6 @@ public class WindmillShaftRenderer implements BlockEntityRenderer<WindmillShaftB
 
         // 1. Считаем угол ОДИН раз
         float renderAngle = entity.prevAngle + (entity.angle - entity.prevAngle) * partialTick;
-        // Если вал подключен к коробке передач, инвертируем угол
-        if (entity.isFlipped) renderAngle = -renderAngle;
 
         if (facing.getAxis() == Direction.Axis.Y) {
             // Для вертикали

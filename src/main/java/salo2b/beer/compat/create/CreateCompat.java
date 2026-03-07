@@ -2,6 +2,7 @@ package salo2b.beer.compat.create;
 
 import salo2b.beer.block.*;
 import salo2b.beer.registration.ModItems;
+import salo2b.beer.menu.MillstoneMenu;
 import salo2b.beer.registration.ModBlockEntities;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -15,11 +16,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -66,6 +72,11 @@ public class CreateCompat {
         return new CompatMillstoneBlock(BlockBehaviour.Properties.of().sound(SoundType.STONE).noOcclusion().strength(3.5f).requiresCorrectToolForDrops());
     }
 
+    public static BlockEntityType.BlockEntitySupplier<?> getRotorBESupplier() { return CompatWindmillRotorBlockEntity::new; }
+    public static BlockEntityType.BlockEntitySupplier<?> getShaftBESupplier() { return CompatWindmillShaftBlockEntity::new; }
+    public static BlockEntityType.BlockEntitySupplier<?> getGearboxBESupplier() { return CompatGearboxBlockEntity::new; }
+    public static BlockEntityType.BlockEntitySupplier<?> getMillstoneBESupplier() { return CompatMillstoneBlockEntity::new; }
+
     // ==========================================
     // WINDMILL ROTOR
     // ==========================================
@@ -73,10 +84,19 @@ public class CreateCompat {
     public static class CompatWindmillRotorBlock extends KineticBlock implements IBE<CompatWindmillRotorBlockEntity> {
         public static final MapCodec<CompatWindmillRotorBlock> CODEC = simpleCodec(CompatWindmillRotorBlock::new);
         public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-        public CompatWindmillRotorBlock(Properties properties) { super(properties); this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH)); }
+
+        public CompatWindmillRotorBlock(Properties properties) {
+            super(properties);
+            this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        }
+
         @Override protected MapCodec<? extends KineticBlock> codec() { return CODEC; }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
-        @Nullable @Override public BlockState getStateForPlacement(BlockPlaceContext context) { return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()); }
+        @Nullable @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
+            return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        }
+        @Override protected BlockState rotate(BlockState state, Rotation rot) { return state.setValue(FACING, rot.rotate(state.getValue(FACING))); }
+        @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
         @Override public Direction.Axis getRotationAxis(BlockState state) { return state.getValue(FACING).getAxis(); }
         @Override public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) { return face == state.getValue(FACING).getOpposite(); }
         @Override public Class<CompatWindmillRotorBlockEntity> getBlockEntityClass() { return CompatWindmillRotorBlockEntity.class; }
@@ -88,8 +108,7 @@ public class CreateCompat {
         private boolean updateNetwork = true;
         public CompatWindmillRotorBlockEntity(BlockPos pos, BlockState state) { super(ModBlockEntities.WINDMILL_ROTOR.get(), pos, state); }
         @Override public float getGeneratedSpeed() {
-            Direction facing = getBlockState().getValue(CompatWindmillRotorBlock.FACING);
-            return facing.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 32f : -32f;
+            return 32f; // Always return positive speed so it spins consistently in all directions
         }
         @Override public float calculateAddedStressCapacity() { return 8192f; }
         @Override public void tick() {
@@ -110,8 +129,7 @@ public class CreateCompat {
             float fluidAngle = (time * speed * 1f / 10f) % 360;
             ms.pushPose();
             ms.translate(0.5D, 0.5D, 0.5D);
-            // УБИРАЕМ +180 для правильной ориентации лопастей
-            ms.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
+            ms.mulPose(Axis.YP.rotationDegrees(-facing.toYRot() + 180));
             ms.mulPose(Axis.ZP.rotationDegrees(fluidAngle));
             ms.scale(5.0F, 5.0F, 5.0F);
             ms.translate(-0.5D, -0.5D, -0.5D);
@@ -131,6 +149,8 @@ public class CreateCompat {
         @Override protected MapCodec<? extends KineticBlock> codec() { return CODEC; }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
         @Nullable @Override public BlockState getStateForPlacement(BlockPlaceContext context) { return this.defaultBlockState().setValue(FACING, context.getClickedFace()); }
+        @Override protected BlockState rotate(BlockState state, Rotation rot) { return state.setValue(FACING, rot.rotate(state.getValue(FACING))); }
+        @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
         @Override public Direction.Axis getRotationAxis(BlockState state) { return state.getValue(FACING).getAxis(); }
         @Override public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) { return face.getAxis() == state.getValue(FACING).getAxis(); }
         @Override public Class<CompatWindmillShaftBlockEntity> getBlockEntityClass() { return CompatWindmillShaftBlockEntity.class; }
@@ -187,10 +207,16 @@ public class CreateCompat {
     public static class CompatMillstoneBlock extends KineticBlock implements IBE<CompatMillstoneBlockEntity> {
         public static final MapCodec<CompatMillstoneBlock> CODEC = simpleCodec(CompatMillstoneBlock::new);
         public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-        public CompatMillstoneBlock(Properties properties) { super(properties); this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH)); }
+
+        public CompatMillstoneBlock(Properties properties) {
+            super(properties);
+            this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        }
         @Override protected MapCodec<? extends KineticBlock> codec() { return CODEC; }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
         @Nullable @Override public BlockState getStateForPlacement(BlockPlaceContext context) { return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()); }
+        @Override protected BlockState rotate(BlockState state, Rotation rot) { return state.setValue(FACING, rot.rotate(state.getValue(FACING))); }
+        @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
 
         @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
             if (!level.isClientSide) {
@@ -199,13 +225,17 @@ public class CreateCompat {
                     ItemStack output = millstone.inventory.getStackInSlot(1);
                     ItemStack input = millstone.inventory.getStackInSlot(0);
                     if (!output.isEmpty()) {
-                        Containers.dropItemStack(level, pos.getX(), pos.getY() + 0.5, pos.getZ(), output.copy());
+                        player.getInventory().add(output.copy());
                         millstone.inventory.setStackInSlot(1, ItemStack.EMPTY);
+                        millstone.setChanged();
+                        level.sendBlockUpdated(pos, state, state, 3);
                         return InteractionResult.SUCCESS;
                     } else if (!input.isEmpty()) {
-                        Containers.dropItemStack(level, pos.getX(), pos.getY() + 0.5, pos.getZ(), input.copy());
+                        player.getInventory().add(input.copy());
                         millstone.inventory.setStackInSlot(0, ItemStack.EMPTY);
                         millstone.progress = 0;
+                        millstone.setChanged();
+                        level.sendBlockUpdated(pos, state, state, 3);
                         return InteractionResult.SUCCESS;
                     }
                 }
@@ -217,11 +247,12 @@ public class CreateCompat {
             if (!level.isClientSide) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof CompatMillstoneBlockEntity millstone) {
-                    boolean isInput = stack.getItem() == ModItems.SALT_CRYSTAL.get() || stack.getItem() == ModItems.MALT.get() || stack.getItem() == ModItems.BARLEY.get();
-                    if (isInput) {
+                    if (!stack.isEmpty() && (stack.is(ModItems.MALT.get()) || stack.is(ModItems.BARLEY.get()))) {
                         ItemStack remainder = millstone.inventory.insertItem(0, stack.copy(), false);
                         if (remainder.getCount() < stack.getCount()) {
                             player.setItemInHand(hand, remainder);
+                            millstone.setChanged();
+                            level.sendBlockUpdated(pos, state, state, 3);
                             return ItemInteractionResult.SUCCESS;
                         }
                     }
@@ -244,7 +275,6 @@ public class CreateCompat {
         @Override public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) { return face == Direction.DOWN || face == Direction.UP; }
         @Override public Class<CompatMillstoneBlockEntity> getBlockEntityClass() { return CompatMillstoneBlockEntity.class; }
         @Override public BlockEntityType<? extends CompatMillstoneBlockEntity> getBlockEntityType() { return (BlockEntityType<? extends CompatMillstoneBlockEntity>) ModBlockEntities.MILLSTONE.get(); }
-        @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.ENTITYBLOCK_ANIMATED; }
     }
 
     public static class CompatMillstoneBlockEntity extends KineticBlockEntity implements salo2b.beer.block.entity.IMillstoneBE {
@@ -258,27 +288,22 @@ public class CreateCompat {
             super.tick();
             if (level == null || level.isClientSide) return;
             ItemStack input = inventory.getStackInSlot(0);
-            if (input.isEmpty()) { if (progress > 0) { progress = 0; setChanged(); } return; }
-            ItemStack result = getResult(input);
-            if (result.isEmpty()) return;
+            ItemStack output = inventory.getStackInSlot(1);
             float speed = Math.abs(getSpeed());
-            if (speed > 0 && canInsertResult(inventory.getStackInSlot(1), result)) {
+            if (speed > 0 && !input.isEmpty() && (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) && canInsertResult(output)) {
                 progress += speed / 16.0f;
-                if (progress >= MAX_PROGRESS) { craftItem(result); progress = 0; }
+                if (progress >= MAX_PROGRESS) { craftItem(); progress = 0; }
+                setChanged();
+            } else if (progress > 0) { progress = 0; setChanged(); level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); }
+        }
+        private boolean canInsertResult(ItemStack output) { return output.isEmpty() || (output.is(ModItems.CRUSHED_MALT.get()) && output.getCount() < output.getMaxStackSize()); }
+        private void craftItem() {
+            ItemStack input = inventory.getStackInSlot(0);
+            if (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) {
+                input.shrink(1);
+                inventory.insertItem(1, new ItemStack(ModItems.CRUSHED_MALT.get()), false);
                 setChanged();
             }
-        }
-        private ItemStack getResult(ItemStack input) {
-            if (input.getItem() == ModItems.SALT_CRYSTAL.get()) return new ItemStack(ModItems.SALT.get());
-            if (input.getItem() == ModItems.MALT.get() || input.getItem() == ModItems.BARLEY.get()) return new ItemStack(ModItems.CRUSHED_MALT.get());
-            return ItemStack.EMPTY;
-        }
-        private boolean canInsertResult(ItemStack output, ItemStack result) { return output.isEmpty() || (ItemStack.isSameItem(output, result) && output.getCount() < output.getMaxStackSize()); }
-        private void craftItem(ItemStack result) {
-            inventory.getStackInSlot(0).shrink(1);
-            inventory.insertItem(1, result.copy(), false);
-            setChanged();
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
         @Override protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) { super.write(tag, registries, clientPacket); tag.put("inventory", inventory.serializeNBT(registries)); tag.putFloat("progress", progress); }
         @Override protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) { super.read(tag, registries, clientPacket); if (tag.contains("inventory")) inventory.deserializeNBT(registries, tag.getCompound("inventory")); if (tag.contains("progress")) progress = tag.getFloat("progress"); }
@@ -287,6 +312,7 @@ public class CreateCompat {
     public static class CompatMillstoneRenderer extends KineticBlockEntityRenderer<CompatMillstoneBlockEntity> {
         public CompatMillstoneRenderer(BlockEntityRendererProvider.Context context) { super(context); }
         @Override protected void renderSafe(CompatMillstoneBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
+            super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
             BlockState state = be.getBlockState();
             BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
             float speed = be.getSpeed();
@@ -294,7 +320,7 @@ public class CreateCompat {
             float angle = (time * speed * 1f / 10f) % 360;
             ms.pushPose();
             ms.translate(0.5f, 0.5f, 0.5f);
-            ms.mulPose(Axis.YP.rotationDegrees(-angle));
+            ms.mulPose(Axis.YP.rotationDegrees(angle));
             ms.translate(-0.5f, -0.5f, -0.5f);
             Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ms.last(), buffer.getBuffer(RenderType.cutout()), state, model, 1.0F, 1.0F, 1.0F, light, overlay, ModelData.EMPTY, null);
             ms.popPose();

@@ -62,6 +62,10 @@ public class ModBlockEntities {
             BLOCK_ENTITIES.register("fish_dryer_be", () ->
                     BlockEntityType.Builder.of(FishDryerBlockEntity::new, ModBlocks.FISH_DRYER.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SaltingBarrelBlockEntity>> SALTING_BARREL_BE =
+            BLOCK_ENTITIES.register("salting_barrel_be", () ->
+                    BlockEntityType.Builder.of(SaltingBarrelBlockEntity::new, ModBlocks.SALTING_BARREL.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

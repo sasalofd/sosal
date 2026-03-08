@@ -99,6 +99,7 @@ public class BeerMod {
         }
         event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.FISH_DRYER_BE.get(), FishDryerRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.SALTING_BARREL_BE.get(), salo2b.beer.client.renderer.SaltingBarrelRenderer::new);
     }
 
     private void registerScreens(RegisterMenuScreensEvent event) {
@@ -145,6 +146,7 @@ public class BeerMod {
                         output.accept(ModItems.SALTED_FISH.get());
                         output.accept(ModItems.DRIED_FISH.get());
                         output.accept(ModBlocks.FISH_DRYER.get());
+                        output.accept(ModBlocks.SALTING_BARREL.get());
                     })
                     .build());
 

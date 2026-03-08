@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "beer:block/salting_barrel"
+    }
+  }
+}

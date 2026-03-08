@@ -121,6 +121,9 @@ public class ModBlocks {
     public static final DeferredBlock<Block> SALT_CRYSTAL = BLOCKS.register("salt_crystal",
             () -> new SaltCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER).mapColor(MapColor.SNOW).randomTicks().strength(0.5f).sound(SoundType.GLASS).requiresCorrectToolForDrops().noOcclusion()));
 
+    public static final DeferredBlock<Block> FISH_DRYER = BLOCKS.register("fish_dryer",
+            () -> new FishDryerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).noOcclusion().strength(2.0f).sound(SoundType.WOOD)));
+
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn);

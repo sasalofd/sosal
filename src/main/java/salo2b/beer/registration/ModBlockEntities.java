@@ -58,6 +58,10 @@ public class ModBlockEntities {
                 return BlockEntityType.Builder.of(GearboxBlockEntity::new, ModBlocks.GEARBOX.get()).build(null);
             });
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FishDryerBlockEntity>> FISH_DRYER_BE =
+            BLOCK_ENTITIES.register("fish_dryer_be", () ->
+                    BlockEntityType.Builder.of(FishDryerBlockEntity::new, ModBlocks.FISH_DRYER.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

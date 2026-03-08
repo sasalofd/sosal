@@ -108,4 +108,13 @@ public class ModItems {
 
     public static final DeferredItem<Item> SALT_CRYSTAL = ITEMS.register("salt_crystal_item",
             () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> SALTED_FISH = ITEMS.register("salted_fish",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).build())));
+
+    public static final DeferredItem<Item> DRIED_FISH = ITEMS.register("dried_fish",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.8f).build())));
+
+    public static final DeferredItem<Item> FISH_DRYER = ITEMS.register("fish_dryer",
+            () -> new BlockItem(ModBlocks.FISH_DRYER.get(), new Item.Properties()));
 }

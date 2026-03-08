@@ -42,5 +42,9 @@
   "block.beer.salt_block": "Блок соли",
   "block.beer.blooming_salt_block": "Расцветающий соляной блок",
   "block.beer.salt_crystal": "Кристалл соли",
-  "item.beer.salt_crystal_item": "Кристалл соли"
+  "item.beer.salt_crystal_item": "Кристалл соли",
+  "item.beer.salted_fish": "Засоленная рыба",
+  "item.beer.dried_fish": "Сушеная рыба",
+  "block.beer.fish_dryer": "Сушилка для рыбы",
+  "item.beer.fish_dryer": "Сушилка для рыбы"
 }

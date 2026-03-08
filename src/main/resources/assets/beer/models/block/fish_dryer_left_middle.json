@@ -1,0 +1,12 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "post": "minecraft:block/oak_log",
+    "rope": "minecraft:block/white_wool",
+    "particle": "minecraft:block/oak_log"
+  },
+  "elements": [
+    { "from": [0, 0, 6], "to": [4, 16, 10], "faces": { "north": { "texture": "#post", "uv": [0, 0, 4, 16] }, "south": { "texture": "#post", "uv": [0, 0, 4, 16] }, "west": { "texture": "#post", "uv": [6, 0, 10, 16] }, "east": { "texture": "#post", "uv": [6, 0, 10, 16] }, "up": { "texture": "#post", "uv": [0, 6, 4, 10] }, "down": { "texture": "#post", "uv": [0, 6, 4, 10] } } },
+    { "from": [9.1, 12.8, 7.5], "to": [10.1, 16, 8.5], "faces": { "north": { "texture": "#rope", "uv": [9, 0, 10, 3] }, "south": { "texture": "#rope", "uv": [9, 0, 10, 3] }, "west": { "texture": "#rope", "uv": [7, 0, 8, 3] }, "east": { "texture": "#rope", "uv": [7, 0, 8, 3] } } }
+  ]
+}

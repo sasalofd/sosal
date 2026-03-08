@@ -82,6 +82,7 @@ public class BeerMod {
             return null;
         });
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BREWERY_BE.get(), (be, side) -> be.tank);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.FISH_DRYER_BE.get(), (be, side) -> be.getInventory());
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -97,6 +98,7 @@ public class BeerMod {
             event.registerBlockEntityRenderer((BlockEntityType<MillstoneBlockEntity>)(Object) ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
         }
         event.registerBlockEntityRenderer(ModBlockEntities.BEER_BARREL_BE.get(), BeerBarrelRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FISH_DRYER_BE.get(), FishDryerRenderer::new);
     }
 
     private void registerScreens(RegisterMenuScreensEvent event) {
@@ -140,6 +142,9 @@ public class BeerMod {
                         output.accept(ModItems.SALT_CRYSTAL.get());
                         output.accept(ModBlocks.SALT_BLOCK.get());
                         output.accept(ModBlocks.BLOOMING_SALT_BLOCK.get());
+                        output.accept(ModItems.SALTED_FISH.get());
+                        output.accept(ModItems.DRIED_FISH.get());
+                        output.accept(ModBlocks.FISH_DRYER.get());
                     })
                     .build());
 

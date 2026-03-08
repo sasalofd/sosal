@@ -1,0 +1,43 @@
+{
+  "variants": {
+    "facing=north,part=left,height=bottom": { "model": "beer:block/fish_dryer_left_bottom" },
+    "facing=north,part=middle,height=bottom": { "model": "beer:block/fish_dryer_middle_bottom" },
+    "facing=north,part=right,height=bottom": { "model": "beer:block/fish_dryer_right_bottom" },
+    "facing=north,part=left,height=middle": { "model": "beer:block/fish_dryer_left_middle" },
+    "facing=north,part=middle,height=middle": { "model": "beer:block/fish_dryer_middle_middle" },
+    "facing=north,part=right,height=middle": { "model": "beer:block/fish_dryer_right_middle" },
+    "facing=north,part=left,height=top": { "model": "beer:block/fish_dryer_left_top" },
+    "facing=north,part=middle,height=top": { "model": "beer:block/fish_dryer_middle_top" },
+    "facing=north,part=right,height=top": { "model": "beer:block/fish_dryer_right_top" },
+    
+    "facing=south,part=left,height=bottom": { "model": "beer:block/fish_dryer_left_bottom", "y": 180 },
+    "facing=south,part=middle,height=bottom": { "model": "beer:block/fish_dryer_middle_bottom", "y": 180 },
+    "facing=south,part=right,height=bottom": { "model": "beer:block/fish_dryer_right_bottom", "y": 180 },
+    "facing=south,part=left,height=middle": { "model": "beer:block/fish_dryer_left_middle", "y": 180 },
+    "facing=south,part=middle,height=middle": { "model": "beer:block/fish_dryer_middle_middle", "y": 180 },
+    "facing=south,part=right,height=middle": { "model": "beer:block/fish_dryer_right_middle", "y": 180 },
+    "facing=south,part=left,height=top": { "model": "beer:block/fish_dryer_left_top", "y": 180 },
+    "facing=south,part=middle,height=top": { "model": "beer:block/fish_dryer_middle_top", "y": 180 },
+    "facing=south,part=right,height=top": { "model": "beer:block/fish_dryer_right_top", "y": 180 },
+
+    "facing=east,part=left,height=bottom": { "model": "beer:block/fish_dryer_left_bottom", "y": 90 },
+    "facing=east,part=middle,height=bottom": { "model": "beer:block/fish_dryer_middle_bottom", "y": 90 },
+    "facing=east,part=right,height=bottom": { "model": "beer:block/fish_dryer_right_bottom", "y": 90 },
+    "facing=east,part=left,height=middle": { "model": "beer:block/fish_dryer_left_middle", "y": 90 },
+    "facing=east,part=middle,height=middle": { "model": "beer:block/fish_dryer_middle_middle", "y": 90 },
+    "facing=east,part=right,height=middle": { "model": "beer:block/fish_dryer_right_middle", "y": 90 },
+    "facing=east,part=left,height=top": { "model": "beer:block/fish_dryer_left_top", "y": 90 },
+    "facing=east,part=middle,height=top": { "model": "beer:block/fish_dryer_middle_top", "y": 90 },
+    "facing=east,part=right,height=top": { "model": "beer:block/fish_dryer_right_top", "y": 90 },
+
+    "facing=west,part=left,height=bottom": { "model": "beer:block/fish_dryer_left_bottom", "y": 270 },
+    "facing=west,part=middle,height=bottom": { "model": "beer:block/fish_dryer_middle_bottom", "y": 270 },
+    "facing=west,part=right,height=bottom": { "model": "beer:block/fish_dryer_right_bottom", "y": 270 },
+    "facing=west,part=left,height=middle": { "model": "beer:block/fish_dryer_left_middle", "y": 270 },
+    "facing=west,part=middle,height=middle": { "model": "beer:block/fish_dryer_middle_middle", "y": 270 },
+    "facing=west,part=right,height=middle": { "model": "beer:block/fish_dryer_right_middle", "y": 270 },
+    "facing=west,part=left,height=top": { "model": "beer:block/fish_dryer_left_top", "y": 270 },
+    "facing=west,part=middle,height=top": { "model": "beer:block/fish_dryer_middle_top", "y": 270 },
+    "facing=west,part=right,height=top": { "model": "beer:block/fish_dryer_right_top", "y": 270 }
+  }
+}

@@ -14,10 +14,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
+import salo2b.beer.item.FishHelper;
 import salo2b.beer.registration.ModBlockEntities;
 import salo2b.beer.registration.ModItems;
+import java.util.List;
 
 public class FishDryerBlockEntity extends BlockEntity {
     private final ItemStackHandler inventory = new ItemStackHandler(4) {
@@ -32,21 +35,57 @@ public class FishDryerBlockEntity extends BlockEntity {
 
     private final int[] progress = new int[4];
     private static final int DRY_TIME = 2400;
+    
+    // Анимация
+    public final float[] swingAngles = new float[4];
+    public final float[] swingSpeeds = new float[4];
 
     public FishDryerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FISH_DRYER_BE.get(), pos, state);
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, FishDryerBlockEntity be) {
+        if (level.isClientSide) {
+            for (int i = 0; i < 4; i++) {
+                if (!be.inventory.getStackInSlot(i).isEmpty()) {
+                    // Гравитация и пружина
+                    be.swingSpeeds[i] -= be.swingAngles[i] * 0.15f; 
+                    be.swingSpeeds[i] *= 0.85f; // Трение
+                    be.swingAngles[i] += be.swingSpeeds[i];
+                    
+                    // Легкий ветер
+                    float wind = (float) Math.sin(level.getGameTime() * 0.05f + i) * 0.015f;
+                    be.swingAngles[i] += wind;
+
+                    // Столкновения с игроками
+                    double xOffset = pos.getX() + 0.5 + (-0.02 + i * 0.6) - 0.5; // Примерное положение
+                    AABB fishBox = new AABB(xOffset - 0.2, pos.getY() + 0.5, pos.getZ() - 0.2, xOffset + 0.2, pos.getY() + 1.5, pos.getZ() + 1.2);
+                    List<Player> players = level.getEntitiesOfClass(Player.class, fishBox);
+                    if (!players.isEmpty()) {
+                        for (Player p : players) {
+                            double velZ = p.getDeltaMovement().z;
+                            if (Math.abs(velZ) > 0.01) {
+                                be.swingSpeeds[i] += (float) (velZ * 0.3);
+                            }
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         boolean changed = false;
         for (int i = 0; i < 4; i++) {
             ItemStack stack = be.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.is(ModItems.SALTED_FISH.get())) {
+            if (!stack.isEmpty() && FishHelper.isSaltedFish(stack)) {
                 be.progress[i]++;
                 if (be.progress[i] >= DRY_TIME) {
-                    be.inventory.setStackInSlot(i, new ItemStack(ModItems.DRIED_FISH.get()));
-                    be.progress[i] = 0;
-                    changed = true;
+                    net.minecraft.world.item.Item driedVariant = FishHelper.getDriedVariant(stack.getItem());
+                    if (driedVariant != null) {
+                        be.inventory.setStackInSlot(i, new ItemStack(driedVariant));
+                        be.progress[i] = 0;
+                        changed = true;
+                    }
                 }
             } else {
                 be.progress[i] = 0;
@@ -61,8 +100,11 @@ public class FishDryerBlockEntity extends BlockEntity {
     public ItemInteractionResult useItemOnSlot(Player player, InteractionHand hand, ItemStack stack, int slot) {
         ItemStack slotStack = inventory.getStackInSlot(slot);
         if (slotStack.isEmpty()) {
-            if (stack.is(ModItems.SALTED_FISH.get())) {
+            if (FishHelper.isSaltedFish(stack)) {
                 inventory.setStackInSlot(slot, stack.split(1));
+                if (level != null && level.isClientSide) {
+                    swingSpeeds[slot] = 0.2f; // Толчок при подвешивании
+                }
                 return ItemInteractionResult.SUCCESS;
             }
         } else {

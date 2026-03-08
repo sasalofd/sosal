@@ -109,10 +109,22 @@ public class ModItems {
     public static final DeferredItem<Item> SALT_CRYSTAL = ITEMS.register("salt_crystal_item",
             () -> new Item(new Item.Properties()));
 
-    public static final DeferredItem<Item> SALTED_FISH = ITEMS.register("salted_fish",
+    public static final DeferredItem<Item> SALTED_COD = ITEMS.register("salted_cod",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).build())));
+    public static final DeferredItem<Item> SALTED_SALMON = ITEMS.register("salted_salmon",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).build())));
+    public static final DeferredItem<Item> SALTED_PUFFERFISH = ITEMS.register("salted_pufferfish",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).build())));
+    public static final DeferredItem<Item> SALTED_TROPICAL_FISH = ITEMS.register("salted_tropical_fish",
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).build())));
 
-    public static final DeferredItem<Item> DRIED_FISH = ITEMS.register("dried_fish",
+    public static final DeferredItem<Item> DRIED_COD = ITEMS.register("dried_cod",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.8f).build())));
+    public static final DeferredItem<Item> DRIED_SALMON = ITEMS.register("dried_salmon",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.8f).build())));
+    public static final DeferredItem<Item> DRIED_PUFFERFISH = ITEMS.register("dried_pufferfish",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.8f).build())));
+    public static final DeferredItem<Item> DRIED_TROPICAL_FISH = ITEMS.register("dried_tropical_fish",
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.8f).build())));
 
     public static final DeferredItem<Item> FISH_DRYER = ITEMS.register("fish_dryer",

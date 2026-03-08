@@ -143,8 +143,14 @@ public class BeerMod {
                         output.accept(ModItems.SALT_CRYSTAL.get());
                         output.accept(ModBlocks.SALT_BLOCK.get());
                         output.accept(ModBlocks.BLOOMING_SALT_BLOCK.get());
-                        output.accept(ModItems.SALTED_FISH.get());
-                        output.accept(ModItems.DRIED_FISH.get());
+                        output.accept(ModItems.SALTED_COD.get());
+                        output.accept(ModItems.SALTED_SALMON.get());
+                        output.accept(ModItems.SALTED_PUFFERFISH.get());
+                        output.accept(ModItems.SALTED_TROPICAL_FISH.get());
+                        output.accept(ModItems.DRIED_COD.get());
+                        output.accept(ModItems.DRIED_SALMON.get());
+                        output.accept(ModItems.DRIED_PUFFERFISH.get());
+                        output.accept(ModItems.DRIED_TROPICAL_FISH.get());
                         output.accept(ModBlocks.FISH_DRYER.get());
                         output.accept(ModBlocks.SALTING_BARREL.get());
                     })

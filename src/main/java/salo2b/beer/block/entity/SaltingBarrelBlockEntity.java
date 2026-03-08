@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
+import salo2b.beer.item.FishHelper;
 import salo2b.beer.registration.ModBlockEntities;
 import salo2b.beer.registration.ModItems;
 
@@ -52,7 +53,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
 
         for (int i = 0; i < be.inventory.getSlots(); i++) {
             ItemStack stack = be.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.is(ItemTags.FISHES) && !stack.is(ModItems.SALTED_FISH.get())) {
+            if (!stack.isEmpty() && FishHelper.isRawFish(stack)) {
                 // Если есть хотя бы 2 соли для этой рыбы
                 if (availableSalt >= 2) {
                     be.progress[i]++;
@@ -61,11 +62,14 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
 
                     if (be.progress[i] >= SALT_TIME) {
                         if (!level.isClientSide) {
-                            be.inventory.setStackInSlot(i, new ItemStack(ModItems.SALTED_FISH.get()));
-                            be.saltCount -= 2; // Фактически забираем соль, так как рыба приготовилась
-                            be.progress[i] = 0;
-                            level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 1.0f, 1.0f);
-                            finishedAny = true;
+                            net.minecraft.world.item.Item saltedVariant = FishHelper.getSaltedVariant(stack.getItem());
+                            if (saltedVariant != null) {
+                                be.inventory.setStackInSlot(i, new ItemStack(saltedVariant));
+                                be.saltCount -= 2; // Фактически забираем соль, так как рыба приготовилась
+                                be.progress[i] = 0;
+                                level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 1.0f, 1.0f);
+                                finishedAny = true;
+                            }
                         }
                     }
                 }
@@ -75,7 +79,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
         if (activeFish > 0 && level.isClientSide && level.random.nextInt(10) == 0) {
             level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.SALT.get())),
                     pos.getX() + 0.2 + level.random.nextDouble() * 0.6,
-                    pos.getY() + 0.2, // Понижено для полубочки
+                    pos.getY() + 0.8, // Поднято для полного блока бочки
                     pos.getZ() + 0.2 + level.random.nextDouble() * 0.6,
                     0, 0.05, 0);
         }
@@ -107,7 +111,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
                 boolean extractedSalted = false;
                 for (int i = 0; i < inventory.getSlots(); i++) {
                     ItemStack slotStack = inventory.getStackInSlot(i);
-                    if (!slotStack.isEmpty() && slotStack.is(ModItems.SALTED_FISH.get())) {
+                    if (!slotStack.isEmpty() && FishHelper.isSaltedFish(slotStack)) {
                         if (!player.getInventory().add(slotStack.copy())) {
                             player.drop(slotStack.copy(), false);
                         }
@@ -138,7 +142,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
                         int simulatedAvailableSalt = saltCount;
                         for (int i = 0; i < inventory.getSlots(); i++) {
                             ItemStack slotStack = inventory.getStackInSlot(i);
-                            if (!slotStack.isEmpty() && slotStack.is(ItemTags.FISHES) && !slotStack.is(ModItems.SALTED_FISH.get())) {
+                            if (!slotStack.isEmpty() && FishHelper.isRawFish(slotStack)) {
                                 if (simulatedAvailableSalt >= 2) {
                                     if (progress[i] > maxProgress) maxProgress = progress[i];
                                     simulatedAvailableSalt -= 2;
@@ -168,7 +172,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
         // Логика добавления
         if (!stack.isEmpty()) {
             // Добавление сырой рыбы
-            if (stack.is(ItemTags.FISHES) && !stack.is(ModItems.SALTED_FISH.get())) {
+            if (FishHelper.isRawFish(stack)) {
                 for (int i = 0; i < inventory.getSlots(); i++) {
                     if (inventory.getStackInSlot(i).isEmpty()) {
                         if (!level.isClientSide) {
@@ -241,7 +245,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
         int count = 0;
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.is(ItemTags.FISHES) && !stack.is(ModItems.SALTED_FISH.get())) count++;
+            if (!stack.isEmpty() && FishHelper.isRawFish(stack)) count++;
         }
         return count;
     }
@@ -250,7 +254,7 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
         int count = 0;
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.is(ModItems.SALTED_FISH.get())) count++;
+            if (!stack.isEmpty() && FishHelper.isSaltedFish(stack)) count++;
         }
         return count;
     }

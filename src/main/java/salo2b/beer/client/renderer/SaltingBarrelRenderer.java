@@ -122,16 +122,45 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
     }
 
     private void renderFish(SaltingBarrelBlockEntity be, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, double baseY, double saltFillHeight) {
-        double[][] fishOffsets = { {0.5, 0.5}, {0.4, 0.45}, {0.6, 0.55}, {0.45, 0.6}, {0.55, 0.4}, {0.5, 0.35} };
-        float[] fishRotations = {45, 15, 75, -15, -75, 100};
-        double fishY = baseY + saltFillHeight + 0.05;
+        // Возвращаем фиксированные позиции для аккуратности
+        double[][] fishOffsets = { 
+            {0.3, 0.3}, {0.7, 0.7}, 
+            {0.3, 0.7}, {0.7, 0.3}, 
+            {0.5, 0.5}, {0.5, 0.25} 
+        };
+        float[] fishRotations = {45, 135, -45, 225, 15, 90};
+        
+        int saltCount = be.getSaltCount();
+        double fishY = baseY + saltFillHeight + 0.08; 
+        
         for (int i = 0; i < be.getInventory().getSlots(); i++) {
             ItemStack stack = be.getInventory().getStackInSlot(i);
             if (!stack.isEmpty()) {
                 poseStack.pushPose();
-                poseStack.translate(fishOffsets[i][0], fishY + (i * 0.01), fishOffsets[i][1]);
+                
+                boolean isSmallFish = stack.is(Items.COD) || stack.is(ModItems.SALTED_COD.get()) || 
+                                     (!stack.is(Items.SALMON) && !stack.is(ModItems.SALTED_SALMON.get()) && 
+                                      !stack.is(Items.PUFFERFISH) && !stack.is(ModItems.SALTED_PUFFERFISH.get()));
+
+                double sinkOffset = 0;
+                double heightBoost = 0;
+
+                if (saltCount > 0 && i % 2 == 1) {
+                    // Маленькие рыбы (треска, тропические) теперь тонут на -0.04
+                    sinkOffset = isSmallFish ? -0.04 : -0.08;
+                }
+                
+                if (isSmallFish) {
+                    heightBoost = 0.05; // Всегда чуть выше из-за размера модели
+                }
+                
+                poseStack.translate(fishOffsets[i][0], fishY + (i * 0.005) + sinkOffset + heightBoost, fishOffsets[i][1]);
                 poseStack.mulPose(Axis.YP.rotationDegrees(fishRotations[i]));
-                poseStack.scale(0.45f, 0.45f, 0.45f);
+                // Переворачиваем рыбу
+                poseStack.mulPose(Axis.ZP.rotationDegrees(180));
+                // Сдвигаем модель, чтобы она лежала спиной точно на уровне точки привязки
+                poseStack.translate(0, -0.35, 0);
+                poseStack.scale(0.3f, 0.3f, 0.3f);
                 renderFishModel(stack, poseStack, buffer, combinedLight, combinedOverlay);
                 poseStack.popPose();
             }

@@ -65,7 +65,8 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
 
         for (int i = 0; i < be.inventory.getSlots(); i++) {
             ItemStack stack = be.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && FishHelper.isRawFish(stack)) {
+            // Рыба солится ТОЛЬКО КОГДА БОЧКА ЗАКРЫТА
+            if (!isOpen && !stack.isEmpty() && FishHelper.isRawFish(stack)) {
                 // Если есть хотя бы 2 соли для этой рыбы
                 if (availableSalt >= 2) {
                     be.progress[i]++;

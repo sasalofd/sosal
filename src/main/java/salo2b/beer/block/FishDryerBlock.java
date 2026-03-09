@@ -66,21 +66,43 @@ public class FishDryerBlock extends BaseEntityBlock {
             LEFT_POST.put(dir, calculateRotation(dir, Block.box(0, 0, 6, 4, 16, 10)));
             RIGHT_POST.put(dir, calculateRotation(dir, Block.box(12, 0, 6, 16, 16, 10)));
             
-            // СРЕДНИЙ ЯРУС: Веревки только сверху (от 12.8 до 16.0)
-            ROPE_L_MID.put(dir, calculateRotation(dir, Block.box(8.5, 12.8, 7.5, 10.5, 16, 8.5)));
+            // СРЕДНИЙ ЯРУС: Правильное распределение хитбоксов по блокам
+            // LEFT block: Slot 0 (Center 9.5)
+            ROPE_L_MID.put(dir, calculateRotation(dir, Shapes.or(
+                Block.box(9.0, 13.0, 7.5, 10.0, 16.0, 8.5), // Rope 0
+                Block.box(8.0, 4.0, 7.0, 11.0, 13.0, 9.0)   // Fish 0
+            )));
+            
+            // MIDDLE block: Slot 1 (Center 3.5) and Slot 2 (Center 13.5)
             ROPE_M_MID.put(dir, calculateRotation(dir, Shapes.or(
-                    Block.box(2.5, 12.8, 7.5, 4.5, 16, 8.5),
-                    Block.box(12.5, 12.8, 7.5, 14.5, 16, 8.5)
+                Block.box(3.0, 13.0, 7.5, 4.0, 16.0, 8.5), // Rope 1
+                Block.box(2.0, 4.0, 7.0, 5.0, 13.0, 9.0),  // Fish 1
+                Block.box(13.0, 13.0, 7.5, 14.0, 16.0, 8.5), // Rope 2
+                Block.box(12.0, 4.0, 7.0, 15.0, 13.0, 9.0)  // Fish 2
             )));
-            ROPE_R_MID.put(dir, calculateRotation(dir, Block.box(5.5, 12.8, 7.5, 7.5, 16, 8.5)));
+            
+            // RIGHT block: Slot 3 (Center 6.5)
+            ROPE_R_MID.put(dir, calculateRotation(dir, Shapes.or(
+                Block.box(6.0, 13.0, 7.5, 7.0, 16.0, 8.5), // Rope 3
+                Block.box(5.0, 4.0, 7.0, 8.0, 13.0, 9.0)   // Fish 3
+            )));
 
-            // ВЕРХНИЙ ЯРУС: Веревки от низа до перекладины (0.0 до 14.0) + перекладина (14.0 до 15.5)
-            ROPE_L_TOP.put(dir, calculateRotation(dir, Block.box(8.5, 0, 7.5, 10.5, 14, 8.5)));
-            ROPE_M_TOP.put(dir, calculateRotation(dir, Shapes.or(
-                    Block.box(2.5, 0, 7.5, 4.5, 14, 8.5),
-                    Block.box(12.5, 0, 7.5, 14.5, 14, 8.5)
+            // ВЕРХНИЙ ЯРУС: Веревки от низа до перекладины + перекладина
+            ROPE_L_TOP.put(dir, calculateRotation(dir, Shapes.or(
+                Block.box(9.0, 0, 7.5, 10.0, 14, 8.5),
+                Block.box(0, 14, 7.5, 16, 15.5, 8.5)
             )));
-            ROPE_R_TOP.put(dir, calculateRotation(dir, Block.box(5.5, 0, 7.5, 7.5, 14, 8.5)));
+            
+            ROPE_M_TOP.put(dir, calculateRotation(dir, Shapes.or(
+                Block.box(3.0, 0, 7.5, 4.0, 14, 8.5),
+                Block.box(13.0, 0, 7.5, 14.0, 14, 8.5),
+                Block.box(0, 14, 7.5, 16, 15.5, 8.5)
+            )));
+            
+            ROPE_R_TOP.put(dir, calculateRotation(dir, Shapes.or(
+                Block.box(6.0, 0, 7.5, 7.0, 14, 8.5),
+                Block.box(0, 14, 7.5, 16, 15.5, 8.5)
+            )));
             ROPE_TOP_BAR.put(dir, calculateRotation(dir, Block.box(0, 14, 7.5, 16, 15.5, 8.5)));
         }
     }

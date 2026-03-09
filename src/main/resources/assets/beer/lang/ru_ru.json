@@ -43,8 +43,14 @@
   "block.beer.blooming_salt_block": "Расцветающий соляной блок",
   "block.beer.salt_crystal": "Кристалл соли",
   "item.beer.salt_crystal_item": "Кристалл соли",
-  "item.beer.salted_fish": "Засоленная рыба",
-  "item.beer.dried_fish": "Сушеная рыба",
+  "item.beer.salted_cod": "Засоленная треска",
+  "item.beer.salted_salmon": "Засоленный лосось",
+  "item.beer.salted_pufferfish": "Засоленная иглобрюх",
+  "item.beer.salted_tropical_fish": "Засоленная тропическая рыба",
+  "item.beer.dried_cod": "Соленая треска",
+  "item.beer.dried_salmon": "Соленый лосось",
+  "item.beer.dried_pufferfish": "Соленый иглобрюх",
+  "item.beer.dried_tropical_fish": "Соленая тропическая рыба",
   "block.beer.fish_dryer": "Сушилка для рыбы",
   "item.beer.fish_dryer": "Сушилка для рыбы"
 }

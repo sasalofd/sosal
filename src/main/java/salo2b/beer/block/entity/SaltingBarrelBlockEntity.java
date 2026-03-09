@@ -40,11 +40,23 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
     private static final int SALT_TIME = 1200; // 60 секунд (1 минута)
     private static final int MAX_SALT = 12; // По 2 соли на 6 рыб
 
+    public float openProgress;
+    public float prevOpenProgress;
+
     public SaltingBarrelBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.SALTING_BARREL_BE.get(), pos, state);
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, SaltingBarrelBlockEntity be) {
+        // Логика анимации
+        be.prevOpenProgress = be.openProgress;
+        boolean isOpen = state.getValue(salo2b.beer.block.SaltingBarrelBlock.OPEN);
+        if (isOpen && be.openProgress < 1.0f) {
+            be.openProgress = Math.min(1.0f, be.openProgress + 0.1f);
+        } else if (!isOpen && be.openProgress > 0.0f) {
+            be.openProgress = Math.max(0.0f, be.openProgress - 0.1f);
+        }
+
         boolean finishedAny = false;
         int activeFish = 0;
         
@@ -104,11 +116,10 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        // Клик пустой рукой (без шифта)
+        // Клик пустой рукой (без шифта) - достаем ОДНУ рыбу (соленую в приоритете)
         if (stack.isEmpty()) {
             if (!level.isClientSide) {
-                // Сначала пробуем достать только ГОТОВУЮ рыбу
-                boolean extractedSalted = false;
+                // Сначала ищем соленую
                 for (int i = 0; i < inventory.getSlots(); i++) {
                     ItemStack slotStack = inventory.getStackInSlot(i);
                     if (!slotStack.isEmpty() && FishHelper.isSaltedFish(slotStack)) {
@@ -117,55 +128,37 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
                         }
                         inventory.setStackInSlot(i, ItemStack.EMPTY);
                         progress[i] = 0;
-                        extractedSalted = true;
+                        level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.0f);
+                        setChanged();
+                        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                        return ItemInteractionResult.SUCCESS;
                     }
                 }
                 
-                if (extractedSalted) {
-                    level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.0f);
-                    setChanged();
-                    level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-                    return ItemInteractionResult.SUCCESS;
-                }
-
-                // Если готовой рыбы нет, показываем статус в Actionbar
-                int rawFish = getRawFishCount();
-                int saltedFish = getSaltedFishCount();
-                int neededSalt = rawFish * 2;
-                
-                if (rawFish == 0 && saltedFish == 0 && saltCount == 0) {
-                    player.displayClientMessage(net.minecraft.network.chat.Component.literal("§8Бочка пуста"), true);
-                } else {
-                    String status = "";
-                    if (rawFish > 0) {
-                        int maxProgress = 0;
-                        int simulatedAvailableSalt = saltCount;
-                        for (int i = 0; i < inventory.getSlots(); i++) {
-                            ItemStack slotStack = inventory.getStackInSlot(i);
-                            if (!slotStack.isEmpty() && FishHelper.isRawFish(slotStack)) {
-                                if (simulatedAvailableSalt >= 2) {
-                                    if (progress[i] > maxProgress) maxProgress = progress[i];
-                                    simulatedAvailableSalt -= 2;
-                                }
-                            }
+                // Если соленой нет, пробуем забрать сырую
+                for (int i = 0; i < inventory.getSlots(); i++) {
+                    ItemStack slotStack = inventory.getStackInSlot(i);
+                    if (!slotStack.isEmpty()) {
+                        if (!player.getInventory().add(slotStack.copy())) {
+                            player.drop(slotStack.copy(), false);
                         }
-                        
-                        if (saltCount >= 2) {
-                            status = "§aСолится... " + (maxProgress * 100 / SALT_TIME) + "%";
-                        } else {
-                            status = "§cПауза (мало соли)";
-                        }
-                    } else if (saltedFish > 0) {
-                        status = "§eГотово!";
-                    } else {
-                        status = "§eОжидание рыбы";
+                        inventory.setStackInSlot(i, ItemStack.EMPTY);
+                        progress[i] = 0;
+                        level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5f, 1.0f);
+                        setChanged();
+                        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+                        return ItemInteractionResult.SUCCESS;
                     }
-                    
-                    player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                        "§bСырой: " + rawFish + " §f| §eСоленой: " + saltedFish + " §f| §fСоли: " + saltCount + "/" + (rawFish > 0 ? neededSalt : MAX_SALT) + " §8- " + status
-                    ), true);
                 }
             }
+            // Если на сервере ничего не нашли, возвращаем PASS, чтобы блок закрылся
+            if (!level.isClientSide) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            
+            // На клиенте - если инвентарь пуст, тоже PASS
+            boolean isEmpty = true;
+            for (int i = 0; i < inventory.getSlots(); i++) if (!inventory.getStackInSlot(i).isEmpty()) isEmpty = false;
+            if (isEmpty) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
@@ -185,7 +178,6 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 }
-                if (!level.isClientSide) player.displayClientMessage(net.minecraft.network.chat.Component.literal("§cБочка полна рыбы!"), true);
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
             
@@ -201,7 +193,6 @@ public class SaltingBarrelBlockEntity extends BlockEntity {
                     }
                     return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 }
-                if (!level.isClientSide) player.displayClientMessage(net.minecraft.network.chat.Component.literal("§cСлишком много соли!"), true);
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
         }

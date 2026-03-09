@@ -1,13 +1,128 @@
 {
-  "parent": "block/block",
-  "textures": {
-    "post": "minecraft:block/oak_log",
-    "rope": "minecraft:block/white_wool",
-    "particle": "minecraft:block/oak_log"
-  },
-  "elements": [
-    { "from": [0, 0, 6], "to": [4, 16, 10], "faces": { "north": { "texture": "#post", "uv": [0, 0, 4, 16] }, "south": { "texture": "#post", "uv": [0, 0, 4, 16] }, "west": { "texture": "#post", "uv": [6, 0, 10, 16] }, "east": { "texture": "#post", "uv": [6, 0, 10, 16] }, "up": { "texture": "#post", "uv": [0, 6, 4, 10] }, "down": { "texture": "#post", "uv": [0, 6, 4, 10] } } },
-    { "from": [4, 14, 7.5], "to": [16, 15.5, 8.5], "faces": { "north": { "texture": "#rope", "uv": [4, 1, 16, 2.5] }, "south": { "texture": "#rope", "uv": [4, 1, 16, 2.5] }, "up": { "texture": "#rope", "uv": [4, 7, 16, 9] }, "down": { "texture": "#rope", "uv": [4, 7, 16, 9] } } },
-    { "from": [9.1, 0, 7.5], "to": [10.1, 14, 8.5], "faces": { "north": { "texture": "#rope", "uv": [9, 0, 10, 16] }, "south": { "texture": "#rope", "uv": [9, 0, 10, 16] }, "west": { "texture": "#rope", "uv": [7, 0, 8, 16] }, "east": { "texture": "#rope", "uv": [7, 0, 8, 16] } } }
-  ]
+    "parent":  "block/block",
+    "textures":  {
+                     "post":  "minecraft:block/oak_log",
+                     "rope":  "minecraft:block/white_wool",
+                     "particle":  "minecraft:block/oak_log"
+                 },
+    "elements":  [
+                     {
+                         "from":  [
+                                      0,
+                                      0,
+                                      6
+                                  ],
+                         "to":  [
+                                    4,
+                                    16,
+                                    10
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#post",
+                                                     "uv":  [
+                                                                0,
+                                                                0,
+                                                                4,
+                                                                16
+                                                            ]
+                                                 },
+                                       "south":  {
+                                                     "texture":  "#post",
+                                                     "uv":  [
+                                                                0,
+                                                                0,
+                                                                4,
+                                                                16
+                                                            ]
+                                                 },
+                                       "west":  {
+                                                    "texture":  "#post",
+                                                    "uv":  [
+                                                               6,
+                                                               0,
+                                                               10,
+                                                               16
+                                                           ]
+                                                },
+                                       "east":  {
+                                                    "texture":  "#post",
+                                                    "uv":  [
+                                                               6,
+                                                               0,
+                                                               10,
+                                                               16
+                                                           ]
+                                                },
+                                       "up":  {
+                                                  "texture":  "#post",
+                                                  "uv":  [
+                                                             0,
+                                                             6,
+                                                             4,
+                                                             10
+                                                         ]
+                                              },
+                                       "down":  {
+                                                    "texture":  "#post",
+                                                    "uv":  [
+                                                               0,
+                                                               6,
+                                                               4,
+                                                               10
+                                                           ]
+                                                }
+                                   }
+                     },
+                     {
+                         "from":  [
+                                      4,
+                                      14,
+                                      7.5
+                                  ],
+                         "to":  [
+                                    16,
+                                    15.5,
+                                    8.5
+                                ],
+                         "faces":  {
+                                       "north":  {
+                                                     "texture":  "#rope",
+                                                     "uv":  [
+                                                                4,
+                                                                1,
+                                                                16,
+                                                                2.5
+                                                            ]
+                                                 },
+                                       "south":  {
+                                                     "texture":  "#rope",
+                                                     "uv":  [
+                                                                4,
+                                                                1,
+                                                                16,
+                                                                2.5
+                                                            ]
+                                                 },
+                                       "up":  {
+                                                  "texture":  "#rope",
+                                                  "uv":  [
+                                                             4,
+                                                             7,
+                                                             16,
+                                                             9
+                                                         ]
+                                              },
+                                       "down":  {
+                                                    "texture":  "#rope",
+                                                    "uv":  [
+                                                               4,
+                                                               7,
+                                                               16,
+                                                               9
+                                                           ]
+                                                }
+                                   }
+                     }
+                 ]
 }

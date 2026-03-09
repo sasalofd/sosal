@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "minecraft:item/tropical_fish" } }
+{
+    "textures":  {
+                     "layer0":  "beer:item/salted_tropical_fish"
+                 },
+    "parent":  "item/generated"
+}

@@ -1,7 +1,13 @@
 {
   "variants": {
-    "": {
-      "model": "beer:block/salting_barrel"
-    }
+    "facing=north,half=lower,open=false": { "model": "beer:block/salting_barrel" },
+    "facing=east,half=lower,open=false":  { "model": "beer:block/salting_barrel", "y": 90 },
+    "facing=south,half=lower,open=false": { "model": "beer:block/salting_barrel", "y": 180 },
+    "facing=west,half=lower,open=false":  { "model": "beer:block/salting_barrel", "y": 270 },
+    "facing=north,half=lower,open=true":  { "model": "beer:block/salting_barrel" },
+    "facing=east,half=lower,open=true":   { "model": "beer:block/salting_barrel", "y": 90 },
+    "facing=south,half=lower,open=true":  { "model": "beer:block/salting_barrel", "y": 180 },
+    "facing=west,half=lower,open=true":   { "model": "beer:block/salting_barrel", "y": 270 },
+    "half=upper": { "model": "beer:block/salting_barrel_upper" }
   }
 }

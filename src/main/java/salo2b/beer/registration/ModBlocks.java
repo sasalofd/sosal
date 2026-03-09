@@ -124,6 +124,9 @@ public class ModBlocks {
     public static final DeferredBlock<Block> FISH_DRYER = BLOCKS.register("fish_dryer",
             () -> new FishDryerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).noOcclusion().strength(2.0f).sound(SoundType.WOOD)));
 
+    public static final DeferredBlock<Block> SALTING_BARREL_LID = BLOCKS.register("salting_barrel_lid",
+            () -> new SaltingBarrelLidBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL).noOcclusion().noLootTable()));
+
     public static final DeferredBlock<Block> SALTING_BARREL = registerBlock("salting_barrel",
             () -> new SaltingBarrelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL).noOcclusion()));
 

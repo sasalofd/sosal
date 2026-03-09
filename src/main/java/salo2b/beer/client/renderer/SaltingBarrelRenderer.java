@@ -11,7 +11,7 @@ import net.minecraft.client.model.TropicalFishModelA;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;        
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -27,8 +27,8 @@ import salo2b.beer.item.FishHelper;
 import salo2b.beer.registration.ModItems;
 
 public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelBlockEntity> {
-    
-    private static final ResourceLocation SALT_TEXTURE = ResourceLocation.withDefaultNamespace("block/white_concrete_powder");
+
+    private static final ResourceLocation SALT_TEXTURE = ResourceLocation.withDefaultNamespace("block/white_concrete_powder");     
     private static final ResourceLocation BARREL_TOP = ResourceLocation.withDefaultNamespace("block/barrel_top");
     private static final ResourceLocation BARREL_SIDE = ResourceLocation.withDefaultNamespace("block/barrel_side");
 
@@ -39,13 +39,13 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
 
     private static final ResourceLocation COD_TEX = ResourceLocation.withDefaultNamespace("textures/entity/fish/cod.png");
     private static final ResourceLocation SALTED_COD_TEX = ResourceLocation.fromNamespaceAndPath("beer", "textures/entity/fish/salted_cod.png");
-    
-    private static final ResourceLocation SALMON_TEX = ResourceLocation.withDefaultNamespace("textures/entity/fish/salmon.png");
+
+    private static final ResourceLocation SALMON_TEX = ResourceLocation.withDefaultNamespace("textures/entity/fish/salmon.png");   
     private static final ResourceLocation SALTED_SALMON_TEX = ResourceLocation.fromNamespaceAndPath("beer", "textures/entity/fish/salted_salmon.png");
-    
+
     private static final ResourceLocation PUFFERFISH_TEX = ResourceLocation.withDefaultNamespace("textures/entity/fish/pufferfish.png");
     private static final ResourceLocation SALTED_PUFFERFISH_TEX = ResourceLocation.fromNamespaceAndPath("beer", "textures/entity/fish/salted_pufferfish.png");
-    
+
     private static final ResourceLocation TROPICAL_TEX = ResourceLocation.withDefaultNamespace("textures/entity/fish/tropical_a.png");
     private static final ResourceLocation SALTED_TROPICAL_TEX = ResourceLocation.fromNamespaceAndPath("beer", "textures/entity/fish/salted_tropical_a.png");
 
@@ -62,7 +62,7 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
         int saltCount = be.getSaltCount();
         double baseY = 0.125;
         double saltFillHeight = saltCount > 0 ? (saltCount / 12.0) * 0.75 : 0;
-        
+
         Direction facing = Direction.NORTH;
         if (be.getBlockState().hasProperty(salo2b.beer.block.SaltingBarrelBlock.FACING)) {
             facing = be.getBlockState().getValue(salo2b.beer.block.SaltingBarrelBlock.FACING);
@@ -77,7 +77,7 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
     }
 
     private void renderSalt(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float y) {
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(SALT_TEXTURE);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(SALT_TEXTURE);        
         VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.solid());
         Matrix4f matrix = poseStack.last().pose();
         float minX = 0.125f, maxX = 0.875f, minZ = 0.125f, maxZ = 0.875f;
@@ -90,7 +90,7 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
 
     private void renderLid(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float openProgress, Direction facing) {
         poseStack.pushPose();
-        
+
         // 1. Центрируем по верху бочки
         poseStack.translate(0.5, 1.025, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
@@ -99,16 +99,16 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
         // Чтобы крышка была привязана к ПРАВОМУ углу и открывалась ВПРАВО:
         // Используем 0.5 для Права в локальной системе.
         poseStack.translate(0.5, 0, -0.5);
-        
+
         // 3. Вращаем ВПРАВО (CCW на +90 градусов в этой системе координат)
         poseStack.mulPose(Axis.YP.rotationDegrees(openProgress * 90));
-        
+
         // 4. Сдвигаемся обратно
         poseStack.translate(-0.5, 0, 0.5);
 
         VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.cutout());
-        TextureAtlasSprite topSprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BARREL_TOP);
-        TextureAtlasSprite sideSprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BARREL_SIDE);
+        TextureAtlasSprite topSprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BARREL_TOP);       
+        TextureAtlasSprite sideSprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BARREL_SIDE);     
 
         float minX = -0.5f, maxX = 0.5f, minY = -0.0625f, maxY = 0.0625f, minZ = -0.5f, maxZ = 0.5f;
 
@@ -124,7 +124,7 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
     private void renderFish(SaltingBarrelBlockEntity be, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, double baseY, double saltFillHeight) {
         double[][] fishOffsets = { {0.5, 0.5}, {0.4, 0.45}, {0.6, 0.55}, {0.45, 0.6}, {0.55, 0.4}, {0.5, 0.35} };
         float[] fishRotations = {45, 15, 75, -15, -75, 100};
-        double fishY = baseY + saltFillHeight + 0.05; 
+        double fishY = baseY + saltFillHeight + 0.05;
         for (int i = 0; i < be.getInventory().getSlots(); i++) {
             ItemStack stack = be.getInventory().getStackInSlot(i);
             if (!stack.isEmpty()) {
@@ -141,7 +141,7 @@ public class SaltingBarrelRenderer implements BlockEntityRenderer<SaltingBarrelB
     private void renderFishModel(ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         int color = 0xFFFFFFFF;
         VertexConsumer vertexConsumer;
-        
+
         if (stack.is(Items.COD) || stack.is(ModItems.SALTED_COD.get())) {
             ResourceLocation tex = FishHelper.isSaltedFish(stack) ? SALTED_COD_TEX : COD_TEX;
             vertexConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(tex));

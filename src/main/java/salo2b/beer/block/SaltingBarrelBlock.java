@@ -12,6 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -28,6 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import salo2b.beer.block.entity.SaltingBarrelBlockEntity;
 import salo2b.beer.registration.ModBlockEntities;
+import salo2b.beer.registration.ModBlocks;
 
 public class SaltingBarrelBlock extends BaseEntityBlock {
     public static final MapCodec<SaltingBarrelBlock> CODEC = simpleCodec(SaltingBarrelBlock::new);
@@ -68,32 +70,53 @@ public class SaltingBarrelBlock extends BaseEntityBlock {
     protected BlockState updateShape(BlockState state, Direction facing, BlockState facingState, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos facingPos) {
         DoubleBlockHalf half = state.getValue(HALF);
         if (facing.getAxis() == Direction.Axis.Y && (half == DoubleBlockHalf.LOWER == (facing == Direction.UP))) {
-            return facingState.is(this) && facingState.getValue(HALF) != half ? state.setValue(FACING, facingState.getValue(FACING)).setValue(OPEN, facingState.getValue(OPEN)) : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+            return facingState.is(this) && facingState.getValue(HALF) != half ? state.setValue(FACING, facingState.getValue(FACING)).setValue(OPEN, facingState.getValue(OPEN)) : Blocks.AIR.defaultBlockState();
         } else {
             return super.updateShape(state, facing, facingState, level, pos, facingPos);
         }
     }
 
-    private static VoxelShape makeOpenLid(Direction facing) {
-        // Возвращаем тонкий хитбокс (1 пиксель)
-        // Оставляем только 1 пиксель "зацепа" внутри блока, остальное - снаружи
-        switch (facing) {
-            case NORTH: return box(-16.0D, 0.0D, 0.0D, 1.0D, 1.0D, 16.0D);
-            case SOUTH: return box(15.0D, 0.0D, 0.0D, 32.0D, 1.0D, 16.0D);
-            case WEST:  return box(0.0D, 0.0D, 15.0D, 16.0D, 1.0D, 32.0D);
-            case EAST:  return box(0.0D, 0.0D, -16.0D, 1.0D, 1.0D, 0.0D);
-            default:    return Shapes.empty();
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            if (state.getValue(OPEN)) {
+                Direction facing = state.getValue(FACING);
+                BlockPos lidPos = (state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos : pos.above()).relative(facing.getCounterClockWise());
+                if (level.getBlockState(lidPos).is(ModBlocks.SALTING_BARREL_LID.get())) {
+                    level.setBlock(lidPos, Blocks.AIR.defaultBlockState(), 35);
+                }
+            }
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
+    }
+
+    public void setOpen(Level level, BlockPos pos, BlockState state, boolean open) {
+        BlockPos lowerPos = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+        BlockPos upperPos = lowerPos.above();
+        BlockState lowerState = level.getBlockState(lowerPos);
+        BlockState upperState = level.getBlockState(upperPos);
+
+        if (lowerState.is(this)) level.setBlock(lowerPos, lowerState.setValue(OPEN, open), 3);
+        if (upperState.is(this)) level.setBlock(upperPos, upperState.setValue(OPEN, open), 3);
+
+        Direction facing = lowerState.getValue(FACING);
+        BlockPos lidPos = upperPos.relative(facing.getCounterClockWise());
+
+        if (open) {
+            if (level.getBlockState(lidPos).canBeReplaced()) {
+                level.setBlock(lidPos, ModBlocks.SALTING_BARREL_LID.get().defaultBlockState().setValue(SaltingBarrelLidBlock.FACING, facing), 3);
+            }
+        } else {
+            if (level.getBlockState(lidPos).is(ModBlocks.SALTING_BARREL_LID.get())) {
+                level.setBlock(lidPos, Blocks.AIR.defaultBlockState(), 35); // Тихое удаление
+            }
         }
     }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
-            if (state.getValue(OPEN)) {
-                // Только выносная крышка с микро-зацепом на краю
-                return makeOpenLid(state.getValue(FACING));
-            }
-            return box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
+            return state.getValue(OPEN) ? Shapes.empty() : box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
         }
         return BARREL_SHAPE;
     }
@@ -101,18 +124,7 @@ public class SaltingBarrelBlock extends BaseEntityBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
-            if (state.getValue(OPEN)) {
-                // Для коллизии (чтобы стоять) зацеп не нужен, используем чистый офсет
-                Direction facing = state.getValue(FACING);
-                switch (facing) {
-                    case NORTH: return box(-16.0D, 0.0D, 0.0D, 0.0D, 1.0D, 16.0D);
-                    case SOUTH: return box(16.0D, 0.0D, 0.0D, 32.0D, 1.0D, 16.0D);
-                    case WEST:  return box(0.0D, 0.0D, 16.0D, 16.0D, 1.0D, 32.0D);
-                    case EAST:  return box(0.0D, 0.0D, -16.0D, 16.0D, 1.0D, 0.0D);
-                    default:    return Shapes.empty();
-                }
-            }
-            return box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
+            return state.getValue(OPEN) ? Shapes.empty() : box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
         }
         return state.getValue(OPEN) ? BARREL_SHAPE : Shapes.block();
     }
@@ -142,25 +154,22 @@ public class SaltingBarrelBlock extends BaseEntityBlock {
         if (be instanceof SaltingBarrelBlockEntity saltingBarrel) {
             boolean isOpen = barrelState.getValue(OPEN);
             
-            // Если бочка ЗАКРЫТА - открываем по клику в любую часть (пустой рукой)
             if (!isOpen) {
                 if (stack.isEmpty() && !player.isShiftKeyDown()) {
-                    level.setBlock(barrelPos, barrelState.setValue(OPEN, true), 3);
+                    setOpen(level, barrelPos, barrelState, true);
                     level.playSound(null, barrelPos, net.minecraft.sounds.SoundEvents.BARREL_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.2f);
                     return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 }
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             } else {
-                // Если бочка ОТКРЫТА
-                if (isUpper) {
-                    // Клик по КРЫШКЕ (верхний блок) -> Всегда ЗАКРЫТЬ
+                boolean isLidClick = level.getBlockState(hitResult.getBlockPos()).is(ModBlocks.SALTING_BARREL_LID.get());
+                if (isUpper || isLidClick) {
                     if (stack.isEmpty() && !player.isShiftKeyDown()) {
-                        level.setBlock(barrelPos, barrelState.setValue(OPEN, false), 3);
+                        setOpen(level, barrelPos, barrelState, false);
                         level.playSound(null, barrelPos, net.minecraft.sounds.SoundEvents.BARREL_CLOSE, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 0.8f);
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 } else {
-                    // Клик по БОЧКЕ (нижний блок) -> Взаимодействие с рыбой
                     return saltingBarrel.interact(player, hand, stack);
                 }
             }

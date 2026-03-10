@@ -46,16 +46,21 @@ public class MaltVatScreen extends AbstractContainerScreen<MaltVatMenu> {
         // Координаты стрелки в файле: 176, 0
         guiGraphics.blit(TEXTURE, x + 78, y + 55, 176, 0, menu.getScaledProgress(), 16);
 
-        // 3. Рисуем ВОДУ (Пробирка)
+        // 3. Рисуем ВОДУ (Пробирка СЛЕВА)
         int waterHeight = menu.getScaledWater();
         if (waterHeight > 0) {
-            // Допустим, пробирка нарисована слева, около слота с водой
-            int tankX = x + 40;
-            int tankBottomY = y + 70; // Низ пробирки
-
-            // Рисуем синий прямоугольник снизу вверх
-            // Цвет: 0xFF + R(00) G(00) B(FF) = Синий
+            int tankX = x + 39 + 1; // +1 для отступа от рамки
+            int tankBottomY = y + 19 + 51;
             guiGraphics.fill(tankX, tankBottomY - waterHeight, tankX + 10, tankBottomY, 0xFF0000FF);
+        }
+
+        // 4. Рисуем СУСЛО (Пробирка СПРАВА)
+        int wortHeight = menu.getScaledWort();
+        if (wortHeight > 0) {
+            int tankX = x + 125 + 1;
+            int tankBottomY = y + 19 + 51;
+            // Цвет сусла: Коричневый
+            guiGraphics.fill(tankX, tankBottomY - wortHeight, tankX + 10, tankBottomY, 0xFF8B4513);
         }
     }
 

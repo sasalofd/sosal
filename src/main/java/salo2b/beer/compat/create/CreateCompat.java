@@ -247,7 +247,7 @@ public class CreateCompat {
             if (!level.isClientSide) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof CompatMillstoneBlockEntity millstone) {
-                    if (!stack.isEmpty() && (stack.is(ModItems.MALT.get()) || stack.is(ModItems.BARLEY.get()))) {
+                    if (!salo2b.beer.block.entity.MillstoneBlockEntity.getResult(stack).isEmpty()) {
                         ItemStack remainder = millstone.inventory.insertItem(0, stack.copy(), false);
                         if (remainder.getCount() < stack.getCount()) {
                             player.setItemInHand(hand, remainder);
@@ -288,22 +288,34 @@ public class CreateCompat {
             super.tick();
             if (level == null || level.isClientSide) return;
             ItemStack input = inventory.getStackInSlot(0);
+            if (input.isEmpty()) {
+                if (progress > 0) { progress = 0; setChanged(); level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); }
+                return;
+            }
+
+            ItemStack result = salo2b.beer.block.entity.MillstoneBlockEntity.getResult(input);
             ItemStack output = inventory.getStackInSlot(1);
             float speed = Math.abs(getSpeed());
-            if (speed > 0 && !input.isEmpty() && (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) && canInsertResult(output)) {
+
+            if (speed > 0 && !result.isEmpty() && canInsertResult(output, result)) {
                 progress += speed / 16.0f;
-                if (progress >= MAX_PROGRESS) { craftItem(); progress = 0; }
+                if (progress >= MAX_PROGRESS) { craftItem(result); progress = 0; }
                 setChanged();
-            } else if (progress > 0) { progress = 0; setChanged(); level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3); }
-        }
-        private boolean canInsertResult(ItemStack output) { return output.isEmpty() || (output.is(ModItems.CRUSHED_MALT.get()) && output.getCount() < output.getMaxStackSize()); }
-        private void craftItem() {
-            ItemStack input = inventory.getStackInSlot(0);
-            if (input.is(ModItems.MALT.get()) || input.is(ModItems.BARLEY.get())) {
-                input.shrink(1);
-                inventory.insertItem(1, new ItemStack(ModItems.CRUSHED_MALT.get()), false);
+            } else if (progress > 0) {
+                progress = 0;
                 setChanged();
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
+        }
+        private boolean canInsertResult(ItemStack currentOutput, ItemStack result) {
+            if (currentOutput.isEmpty()) return true;
+            return ItemStack.isSameItem(currentOutput, result) && (currentOutput.getCount() + result.getCount()) <= currentOutput.getMaxStackSize();
+        }
+        private void craftItem(ItemStack result) {
+            ItemStack input = inventory.getStackInSlot(0);
+            input.shrink(1);
+            inventory.insertItem(1, result.copy(), false);
+            setChanged();
         }
         @Override protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) { super.write(tag, registries, clientPacket); tag.put("inventory", inventory.serializeNBT(registries)); tag.putFloat("progress", progress); }
         @Override protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) { super.read(tag, registries, clientPacket); if (tag.contains("inventory")) inventory.deserializeNBT(registries, tag.getCompound("inventory")); if (tag.contains("progress")) progress = tag.getFloat("progress"); }

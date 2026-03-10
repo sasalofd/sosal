@@ -67,13 +67,14 @@ public class MillstoneBlock extends BaseEntityBlock {
         if (!level.isClientSide) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof MillstoneBlockEntity millstone) {
-                boolean canInput = stack.getItem() == ModItems.MALT.get() || 
-                                 stack.getItem() == ModItems.BARLEY.get() || 
-                                 stack.getItem() == ModItems.SALT_CRYSTAL.get();
-                if (canInput) {
-                    ItemStack remainder = millstone.inventory.insertItem(0, stack.copy(), false);
-                    if (remainder.getCount() < stack.getCount()) {
-                        player.setItemInHand(hand, remainder);
+                // Используем общую логику проверки результата
+                if (!MillstoneBlockEntity.getResult(stack).isEmpty()) {
+                    ItemStack toInsert = stack.copy();
+                    toInsert.setCount(1);
+                    ItemStack remainder = millstone.inventory.insertItem(0, toInsert, false);
+                    
+                    if (remainder.isEmpty()) {
+                        if (!player.isCreative()) stack.shrink(1);
                         return ItemInteractionResult.SUCCESS;
                     }
                 }

@@ -60,6 +60,7 @@ public class BreweryBlockEntity extends BlockEntity {
     public int servings = 0;
     private int brewTime = 0;
     private static final int MAX_BREW_TIME = 400;
+    private ItemStack resultItem = ItemStack.EMPTY;
 
     public BreweryBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.BREWERY_BE.get(), pos, state);
@@ -76,7 +77,7 @@ public class BreweryBlockEntity extends BlockEntity {
 
     // 1. Добавление сусла через ведро (ВРУЧНУЮ)
     public boolean addWort() {
-        if (tank.getSpace() >= 1000 && brewTime == 0) {
+        if (tank.getSpace() >= 1000 && brewTime == 0 && servings == 0) {
             tank.fill(new FluidStack(ModFluids.WORT_SOURCE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
             return true;
         }
@@ -85,20 +86,23 @@ public class BreweryBlockEntity extends BlockEntity {
 
     // --- COMPATIBILITY METHODS ---
     public boolean addIngredient(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        ItemStack remainder = inventory.insertItem(0, stack.copy(), false);
-        if (remainder.getCount() < stack.getCount()) {
-            stack.setCount(remainder.getCount());
-            return true;
-        }
-        return false;
+        if (stack.isEmpty() || servings > 0 || brewTime > 0) return false;
+        if (!inventory.getStackInSlot(0).isEmpty()) return false;
+        
+        ItemStack toInsert = stack.copy();
+        toInsert.setCount(1);
+        ItemStack remainder = inventory.insertItem(0, toInsert, false);
+        return remainder.isEmpty();
     }
 
     public ItemStack takeResult() {
         if (servings > 0) {
-            ItemStack output = getResult();
+            ItemStack output = getResult().copy();
             if (!output.isEmpty()) {
                 servings--;
+                if (servings <= 0) {
+                    resultItem = ItemStack.EMPTY;
+                }
                 updateBlockVisuals();
                 return output;
             }
@@ -108,7 +112,7 @@ public class BreweryBlockEntity extends BlockEntity {
 
     public ItemStack getResult() {
         if (servings > 0) {
-            return new ItemStack(ModItems.BEER.get());
+            return resultItem.isEmpty() ? new ItemStack(ModItems.BEER.get()) : resultItem;
         }
         return ItemStack.EMPTY;
     }
@@ -140,6 +144,18 @@ public class BreweryBlockEntity extends BlockEntity {
                 be.brewTime = 0;
                 be.tank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
                 be.servings = 3; // Выход порций
+                
+                // Определяем тип пива
+                if (ingredient.is(ModItems.HOPS.get())) {
+                    be.resultItem = new ItemStack(ModItems.BEER.get());
+                } else if (ingredient.is(ModItems.GREEN_APPLE.get())) {
+                    be.resultItem = new ItemStack(ModItems.CIDER.get());
+                } else if (ingredient.is(ModItems.BARLEY.get())) {
+                    be.resultItem = new ItemStack(ModItems.BARLEY_BEER.get());
+                } else {
+                    be.resultItem = new ItemStack(ModItems.BEER.get());
+                }
+                
                 ingredient.shrink(1);
                 be.updateBlockVisuals();
             }
@@ -155,6 +171,9 @@ public class BreweryBlockEntity extends BlockEntity {
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putInt("brewTime", brewTime);
         tag.putInt("servings", servings);
+        if (!resultItem.isEmpty()) {
+            tag.put("resultItem", resultItem.save(registries));
+        }
     }
 
     @Override
@@ -164,6 +183,9 @@ public class BreweryBlockEntity extends BlockEntity {
         if (tag.contains("inventory")) inventory.deserializeNBT(registries, tag.getCompound("inventory"));
         brewTime = tag.getInt("brewTime");
         servings = tag.getInt("servings");
+        if (tag.contains("resultItem")) {
+            resultItem = ItemStack.parse(registries, tag.getCompound("resultItem")).orElse(ItemStack.EMPTY);
+        }
     }
 
     @Override

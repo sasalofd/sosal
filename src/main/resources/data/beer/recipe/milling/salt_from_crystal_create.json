@@ -2,14 +2,14 @@
   "type": "create:milling",
   "ingredients": [
     {
-      "item": "beer:salt_crystal_item"
+      "item": "beer:salt_shard"
     }
   ],
   "results": [
     {
-      "item": "beer:salt",
-      "amount": 1
+      "id": "beer:salt",
+      "count": 2
     }
   ],
-  "processing_time": 100
+  "processing_time": 450
 }

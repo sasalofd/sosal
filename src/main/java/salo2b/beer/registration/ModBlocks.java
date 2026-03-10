@@ -71,18 +71,24 @@ public class ModBlocks {
             () -> new WoodenMugBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(0.5f).noOcclusion()));
 
     public static final DeferredBlock<Block> BEER = BLOCKS.register("beer",
-            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of().noOcclusion()));
+
+    public static final DeferredBlock<Block> LIGHT_BEER = BLOCKS.register("light_beer",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of().noOcclusion()));
+
+    public static final DeferredBlock<Block> FILTERED_BEER = BLOCKS.register("filtered_beer",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of().noOcclusion()));
+
+    public static final DeferredBlock<Block> CIDER = BLOCKS.register("cider",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of().noOcclusion()));
+
+    public static final DeferredBlock<Block> BARLEY_BEER = BLOCKS.register("barley_beer",
+            () -> new BeerMugBlock(BlockBehaviour.Properties.of().noOcclusion()));
 
     public static final DeferredBlock<Block> MILLSTONE = registerBlock("millstone",
             () -> ModList.get().isLoaded("create") ?
                     salo2b.beer.compat.create.CreateCompat.createMillstone() :
                     new MillstoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.5f).sound(SoundType.STONE)));
-
-    public static final DeferredBlock<Block> LIGHT_BEER = BLOCKS.register("light_beer",
-            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
-
-    public static final DeferredBlock<Block> FILTERED_BEER = BLOCKS.register("filtered_beer",
-            () -> new BeerMugBlock(BlockBehaviour.Properties.of()));
 
     public static final DeferredBlock<Block> GEARBOX = registerBlock("gearbox",
             () -> ModList.get().isLoaded("create") ?

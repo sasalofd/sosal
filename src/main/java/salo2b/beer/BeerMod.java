@@ -140,7 +140,7 @@ public class BeerMod {
                         output.accept(ModBlocks.MILLSTONE.get());
                         output.accept(ModItems.CRUSHED_MALT.get());
                         output.accept(ModItems.SALT.get());
-                        output.accept(ModItems.SALT_CRYSTAL.get());
+                        output.accept(ModItems.SALT_SHARD.get());
                         output.accept(ModBlocks.SALT_BLOCK.get());
                         output.accept(ModBlocks.BLOOMING_SALT_BLOCK.get());
                         output.accept(ModItems.SALTED_COD.get());

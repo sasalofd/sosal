@@ -120,7 +120,8 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
             return switch (index) {
                 case 0 -> MaltVatBlockEntity.this.progress;
                 case 1 -> MaltVatBlockEntity.this.maxProgress;
-                case 2 -> MaltVatBlockEntity.this.waterTank.getFluidAmount() / 1000; // Для GUI возвращаем ведра
+                case 2 -> MaltVatBlockEntity.this.waterTank.getFluidAmount() / 100; // 0-100 for GUI
+                case 3 -> MaltVatBlockEntity.this.wortTank.getFluidAmount() / 100;  // 0-100 for GUI
                 default -> 0;
             };
         }
@@ -129,15 +130,15 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
             switch (index) {
                 case 0 -> MaltVatBlockEntity.this.progress = value;
                 case 1 -> MaltVatBlockEntity.this.maxProgress = value;
-                case 2 -> {} // Воду через GUI не ставим напрямую
+                case 2, 3 -> {} 
             }
         }
         @Override
-        public int getCount() { return 3; }
+        public int getCount() { return 4; }
     };
 
     public int progress = 0;
-    public int maxProgress = 10; 
+    public int maxProgress = 400; 
 
     public MaltVatBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MALT_VAT_BE.get(), pos, state);
@@ -151,6 +152,7 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
         if (waterBucketInput.is(Items.WATER_BUCKET) && entity.waterTank.getSpace() >= 1000) {
             entity.inventory.setItem(1, new ItemStack(Items.BUCKET));
             entity.waterTank.fill(new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+            entity.setChanged();
         }
 
         ItemStack inputIngredient = entity.inventory.getItem(0); 
@@ -169,19 +171,20 @@ public class MaltVatBlockEntity extends BlockEntity implements MenuProvider {
                 // Создаем жидкое сусло в баке
                 entity.wortTank.fill(new FluidStack(ModFluids.WORT_SOURCE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
                 entity.progress = 0;
+                entity.setChanged();
             }
         } else if (entity.progress > 0) {
             entity.progress = 0;
+            entity.setChanged();
         }
 
         // 3. РАЗЛИВ СУСЛА В ВЕДРА ДЛЯ ИГРОКА (если есть пустое ведро)
-        if (entity.wortTank.getFluidAmount() >= 1000 && emptyBucketSlot.is(Items.BUCKET) && outputSlot.isEmpty()) {
+        if (entity.wortTank.getFluidAmount() >= 1000 && !emptyBucketSlot.isEmpty() && emptyBucketSlot.is(Items.BUCKET) && outputSlot.isEmpty()) {
             entity.wortTank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
             emptyBucketSlot.shrink(1);
             entity.inventory.setItem(3, new ItemStack(ModItems.WORT_BUCKET.get()));
+            entity.setChanged();
         }
-
-        entity.setChanged();
     }
 
     // --- МЕНЮ И СОХРАНЕНИЕ ---

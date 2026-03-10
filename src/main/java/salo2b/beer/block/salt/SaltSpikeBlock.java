@@ -131,7 +131,7 @@ public class SaltSpikeBlock extends Block implements SimpleWaterloggedBlock {
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         if (state.getValue(AGE) == 3) {
-            return List.of(new ItemStack(ModItems.SALT_CRYSTAL.get(), 1));
+            return List.of(new ItemStack(ModItems.SALT_SHARD.get(), 1));
         }
         return Collections.emptyList();
     }

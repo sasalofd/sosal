@@ -24,7 +24,7 @@ public class MaltVatMenu extends AbstractContainerMenu {
 
     // Конструктор клиента
     public MaltVatMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
-        this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(3));
+        this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4));
     }
 
     // Конструктор сервера
@@ -60,6 +60,10 @@ public class MaltVatMenu extends AbstractContainerMenu {
         return this.data.get(2);
     }
 
+    public int getWortLevel() {
+        return this.data.get(3);
+    }
+
     public int getScaledProgress() {
         int progress = this.data.get(0);
         int maxProgress = this.data.get(1);
@@ -68,10 +72,15 @@ public class MaltVatMenu extends AbstractContainerMenu {
     }
 
     public int getScaledWater() {
-        int water = this.data.get(2);
-        int maxWater = 10;
-        int tankHeight = 50; // Высота пробирки в пикселях
-        return maxWater != 0 && water != 0 ? water * tankHeight / maxWater : 0;
+        int water = this.data.get(2); // 0-100
+        int tankHeight = 50; 
+        return water * tankHeight / 100;
+    }
+
+    public int getScaledWort() {
+        int wort = this.data.get(3); // 0-100
+        int tankHeight = 50;
+        return wort * tankHeight / 100;
     }
 
     @Override
@@ -96,6 +105,26 @@ public class MaltVatMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        return ItemStack.EMPTY; // Упрощено для стабильности
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
+            itemstack = itemstack1.copy();
+            if (index < 4) {
+                if (!this.moveItemStackTo(itemstack1, 4, 40, true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!this.moveItemStackTo(itemstack1, 0, 3, false)) {
+                return ItemStack.EMPTY;
+            }
+
+            if (itemstack1.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+        }
+
+        return itemstack;
     }
 }

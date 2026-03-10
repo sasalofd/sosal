@@ -1,3 +1,1 @@
-{
-  "parent": "beer:block/filtered_beer"
-}
+{ "parent": "beer:block/filtered_beer" }

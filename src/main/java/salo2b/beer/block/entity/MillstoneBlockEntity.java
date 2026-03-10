@@ -79,13 +79,24 @@ public class MillstoneBlockEntity extends BlockEntity implements IMillstoneBE {
         }
     }
 
-    private static ItemStack getResult(ItemStack input) {
-        if (input.getItem() == ModItems.SALT_CRYSTAL.get()) {
-            return new ItemStack(ModItems.SALT.get());
+    public static ItemStack getResult(ItemStack input) {
+        if (input.isEmpty()) return ItemStack.EMPTY;
+        
+        net.minecraft.world.item.Item item = input.getItem();
+        
+        // ВРЕМЕННЫЙ ЛОГ ДЛЯ ОТЛАДКИ (удали потом)
+        // System.out.println("Millstone check: " + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item));
+
+        // Осколки соли
+        if (item == ModItems.SALT_SHARD.get() || item == ModBlocks.SALT_CRYSTAL.get().asItem()) {
+            return new ItemStack(ModItems.SALT.get(), 2);
         }
-        if (input.getItem() == ModItems.MALT.get() || input.getItem() == ModItems.BARLEY.get()) {
+        
+        // Ячмень или Солод -> Дробленый солод
+        if (item == ModItems.MALT.get() || item == ModItems.BARLEY.get()) {
             return new ItemStack(ModItems.CRUSHED_MALT.get());
         }
+        
         return ItemStack.EMPTY;
     }
 

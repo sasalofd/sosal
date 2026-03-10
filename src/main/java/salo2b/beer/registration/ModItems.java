@@ -72,15 +72,27 @@ public class ModItems {
             () -> new Item(new Item.Properties().stacksTo(16)));
 
     // --- НАПИТКИ ---
-    public static final DeferredHolder<Item, Item> CIDER = ITEMS.register("cider",
-            () -> new Item(new Item.Properties().stacksTo(16)
-                    .food(new net.minecraft.world.food.FoodProperties.Builder()
-                            .nutrition(4).saturationModifier(0.3f).alwaysEdible().build())));
+    public static final DeferredItem<Item> CIDER = ITEMS.register("cider",
+            () -> new BeerMugItem(ModBlocks.CIDER.get(), new Item.Properties()
+                    .stacksTo(16)
+                    .food(new FoodProperties.Builder()
+                            .nutrition(4).saturationModifier(0.3f).alwaysEdible()
+                            .effect(() -> new MobEffectInstance(MobEffects.LUCK, 400, 0), 1.0f)
+                            .effect(() -> new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200, 0), 1.0f)
+                            .effect(() -> new MobEffectInstance(MobEffects.GLOWING, 200, 0), 1.0f)
+                            .build())
+            ));
 
-    public static final DeferredHolder<Item, Item> BARLEY_BEER = ITEMS.register("barley_beer",
-            () -> new Item(new Item.Properties().stacksTo(16)
-                    .food(new net.minecraft.world.food.FoodProperties.Builder()
-                            .nutrition(5).saturationModifier(0.4f).alwaysEdible().build())));
+    public static final DeferredItem<Item> BARLEY_BEER = ITEMS.register("barley_beer",
+            () -> new BeerMugItem(ModBlocks.BARLEY_BEER.get(), new Item.Properties()
+                    .stacksTo(16)
+                    .food(new FoodProperties.Builder()
+                            .nutrition(5).saturationModifier(0.4f).alwaysEdible()
+                            .effect(() -> new MobEffectInstance(MobEffects.LUCK, 400, 0), 1.0f)
+                            .effect(() -> new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200, 0), 1.0f)
+                            .effect(() -> new MobEffectInstance(MobEffects.GLOWING, 200, 0), 1.0f)
+                            .build())
+            ));
 
     public static final DeferredItem<Item> BARLEY = ITEMS.register("barley",
             () -> new Item(new Item.Properties()));
@@ -106,7 +118,7 @@ public class ModItems {
     public static final DeferredItem<Item> SALT = ITEMS.register("salt",
             () -> new Item(new Item.Properties()));
 
-    public static final DeferredItem<Item> SALT_CRYSTAL = ITEMS.register("salt_crystal_item",
+    public static final DeferredItem<Item> SALT_SHARD = ITEMS.register("salt_shard",
             () -> new Item(new Item.Properties()));
 
     public static final DeferredItem<Item> SALTED_COD = ITEMS.register("salted_cod",
